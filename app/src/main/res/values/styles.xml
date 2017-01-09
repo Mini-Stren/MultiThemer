@@ -1,0 +1,11 @@
+<resources>
+
+    <style name="AppTheme" parent="@style/Theme.AppCompat.Light.NoActionBar"/>
+
+    <style name="TestTheme" parent="@style/MultiThemer.Red">
+        <item name="themeTextColorPrimary">#A5D6A7</item>
+        <item name="themeTextColorPrimaryDark">#81D4FA</item>
+        <item name="themeTextColorAccent">#EF9A9A</item>
+    </style>
+
+</resources>

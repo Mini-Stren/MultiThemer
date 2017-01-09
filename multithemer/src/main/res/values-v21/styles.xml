@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="MultiThemer" parent="@style/Theme.AppCompat.DayNight.NoActionBar">
+        <item name="themeTextColorPrimary">#FFFFFF</item>
+        <item name="themeTextColorPrimaryDark">#FFFFFF</item>
+        <item name="themeTextColorAccent">#FFFFFF</item>
+        <item name="android:navigationBarColor">?attr/colorPrimaryDark</item>
+    </style>
+
+</resources>

@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v4.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="8dp">
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Default Button" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimaryDark"
+            android:text="Button PrimaryDark"
+            android:textColor="?attr/themeTextColorPrimaryDark" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorPrimary"
+            android:text="Button Primary"
+            android:textColor="?attr/themeTextColorPrimary" />
+
+        <Button
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/colorAccent"
+            android:text="Button Accent"
+            android:textColor="?attr/themeTextColorAccent" />
+
+        <ToggleButton
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="ToggleButton" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:backgroundTint="?attr/colorPrimaryDark"
+                app:fabSize="normal"
+                app:srcCompat="@android:drawable/ic_menu_info_details" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:backgroundTint="?attr/colorPrimary"
+                app:fabSize="normal"
+                app:srcCompat="@android:drawable/ic_menu_send" />
+
+            <android.support.design.widget.FloatingActionButton
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:clickable="true"
+                app:fabSize="normal"
+                app:srcCompat="@android:drawable/ic_menu_myplaces" />
+
+        </LinearLayout>
+
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="Switch1" />
+
+        <Switch
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Switch2" />
+
+        <CheckBox
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checked="true"
+            android:text="CheckBox1" />
+
+        <CheckBox
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="CheckBox2" />
+
+        <RadioGroup
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:checkedButton="@+id/radioButton1">
+
+            <RadioButton
+                android:id="@+id/radioButton1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RadioButton1" />
+
+            <RadioButton
+                android:id="@+id/radioButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RadioButton2" />
+
+            <RadioButton
+                android:id="@+id/radioButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="RadioButton3" />
+
+        </RadioGroup>
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="TextView" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
+            android:text="EditText" />
+
+        <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:hint="Password"
+            android:inputType="textPassword" />
+
+        <android.support.design.widget.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <EditText
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="TextInputLayout EditText" />
+
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+            <ProgressBar
+                style="?android:attr/progressBarStyleSmall"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1" />
+
+        </LinearLayout>
+
+        <SeekBar
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:progress="50" />
+
+        <SeekBar
+            style="@style/Widget.AppCompat.SeekBar.Discrete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:max="10"
+            android:progress="3" />
+
+        <RatingBar
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:rating="3" />
+
+    </LinearLayout>
+</android.support.v4.widget.NestedScrollView>
