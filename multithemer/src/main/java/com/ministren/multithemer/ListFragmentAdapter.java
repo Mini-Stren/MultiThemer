@@ -23,15 +23,15 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ColorTheme theme = MultiThemer.getThemesList().get(position);
+        ColorTheme theme = MultiThemer.getInstance().getThemesList().get(position);
         holder.textView.setText(theme.getTag());
         holder.textView.setTextColor(theme.getTextColorPrimary());
         holder.cardView.setCardBackgroundColor(theme.getColorPrimary());
 
-        ColorTheme activeTheme = MultiThemer.getActiveTheme();
+        ColorTheme activeTheme = MultiThemer.getInstance().getActiveTheme();
         if (activeTheme != null
                 && activeTheme.getTag().equals(theme.getTag())
-                && activeTheme.getStyleID() == theme.getStyleID()) {
+                && activeTheme.getStyleResID() == theme.getStyleResID()) {
             holder.checkCircle.setVisibility(View.VISIBLE);
         } else {
             holder.checkCircle.setVisibility(View.GONE);
@@ -40,7 +40,7 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
 
     @Override
     public int getItemCount() {
-        return MultiThemer.getThemesList().size();
+        return MultiThemer.getInstance().getThemesList().size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {
@@ -56,7 +56,7 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
             cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    MultiThemer.setActiveTheme(view.getContext(), textView.getText().toString());
+                    MultiThemer.getInstance().changeTheme(textView.getText().toString());
                 }
             });
         }

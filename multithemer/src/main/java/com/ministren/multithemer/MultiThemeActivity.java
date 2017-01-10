@@ -2,6 +2,7 @@ package com.ministren.multithemer;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -18,29 +19,33 @@ public class MultiThemeActivity extends AppCompatActivity implements SharedPrefe
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
-        MultiThemer.applyTheme(this);
+        MultiThemer.getInstance().applyTheme(this);
         super.onCreate(savedInstanceState);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Utils.getAppPrefs(this).registerOnSharedPreferenceChangeListener(this);
+        MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Utils.getAppPrefs(this).unregisterOnSharedPreferenceChangeListener(this);
+        MultiThemer.getInstance().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        if (s.equals(Utils.PREFERENCE_KEY)) {
-            Log.d(Utils.LOG_TAG, "theme change detected, restarting activity " + toString());
-            Intent intent = getIntent();
-            finish();
-            startActivity(intent);
+        if (s.equals(MultiThemer.PREFERENCE_KEY)) {
+            Log.d(Utils.LOG_TAG, "theme change detected in activity " + toString());
+            if (Build.VERSION.SDK_INT >= 11) {
+                recreate();
+            } else {
+                Intent intent = getIntent();
+                finish();
+                startActivity(intent);
+            }
         }
     }
 }

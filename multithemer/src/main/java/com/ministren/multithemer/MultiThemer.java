@@ -4,16 +4,19 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Application;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.DrawableRes;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.annotation.StyleRes;
 import android.util.Log;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -27,14 +30,27 @@ import java.util.List;
  * <p>
  * 2. Define your themes in {@code styles.xml}, or use up to 16 predefined themes in {@link THEME}
  * <p>
- * 3. Initialize {@link MultiThemer} in {@link Application} class using one of the following methods:
- * {@link #install(Application)},
- * or {@link #install(Application, THEME)},
- * or {@link #install(Application, List, String)}
+ * 3. Initialize {@link MultiThemer} in your {@link Application} class using method {@link #build(Application)}
  * <p>
- * While defining your own themes, you can use following attributes:
+ * 3.1. {@link #build(Application)} will return {@link Builder},
+ * which you can use to add themes, set icon to use in recent apps list,
+ * set SharedPreferences that will be used to save theme tag after theme change
+ * and set by default one of {@link THEME} themes.
+ * <p>
+ * 3.2. If you will not use any of {@link Builder}{@code .addTheme()} methods,
+ * it will automatically fill themes list with all predefined {@link THEME} themes.
+ * It will use {@link THEME#INDIGO} as default theme,
+ * or you can change it with {@link Builder#setDefault(THEME)}
+ * <p>
+ * 3.3. While adding your own themes using {@link Builder}{@code .addTheme()} methods,
+ * don't forget to use for at least one theme method with parameter {@code isDefault}
+ * <p>
+ * 3.4. {@link Builder#setSharedPreferences(SharedPreferences)} is optional.
+ * {@code DefaultSharedPreferences} will be used by default.
+ * <p>
+ * While defining your own themes in {@code styles.xml}, you can use following attributes:
  * {@code themeTextColorPrimary}, {@code themeTextColorPrimaryDark}, {@code themeTextColorAccent}
- * to set better text colors and use them in xml:
+ * to set better text colors and use them in xml like that:
  * {@code ?attr/themeTextColorAccent}
  * or get them in code by calling
  * {@link ColorTheme#getTextColorPrimary()},
@@ -46,126 +62,75 @@ import java.util.List;
  * <p>
  * See also:
  * <p>
- * {@link #useAppIcon(Context, int)} and {@link #useAppIcon(Bitmap)}
+ * {@link Builder#useAppIcon(int)} and {@link Builder#useAppIcon(Bitmap)}
  * <p>
- * {@link #getThemesList()} and {@link #getActiveTheme()} and {@link #clear()}
+ * {@link #getThemesList()} and {@link #getActiveTheme()}
  * <p>
  * {@link THEME} and {@link ColorTheme}
  * <p>
  * {@link MultiThemeActivity}
  * <p>
  * <p>
- * Look at {@code https://github.com/Mini-Stren} for more info, screenshots and demo app.
+ * Look at {@code https://github.com/Mini-Stren/MultiThemer} for more info, screenshots and demo app.
  * <p>
  * Created by Mini-Stren on 06.01.2017
  */
 
-public final class MultiThemer {
+public class MultiThemer {
 
-    private static List<ColorTheme> mThemesList;
-    private static String mActiveThemeTag;
-    private static Bitmap mAppIcon;
+    public static String PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG";
+    private static String PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE";
+    private static boolean DEBUGGING = false;
+
+    private static MultiThemer INSTANCE = null;
+    private List<ColorTheme> mThemes;
+    private SharedPreferences mPrefs;
+    private String mActiveTag;
+    private Bitmap mAppIcon;
+    private boolean mInitialized = false;
 
     private MultiThemer() {
-        throw new AssertionError();
     }
 
-    /**
-     * Initializes MultiThemer with default themes list.
-     * Uses {@code THEME.INDIGO} as start theme if saved tag won't found.
-     *
-     * @param application {@link Application} instance
-     */
-    public static void install(Application application) {
-        install(application, THEME.INDIGO);
+    public static void setDebug(boolean flag) {
+        DEBUGGING = flag;
     }
 
-    /**
-     * Initializes MultiThemer with default themes list.
-     * Uses specified {@link THEME} as start theme if saved tag won't found.
-     *
-     * @param application {@link Application} instance
-     * @param startTheme  {@link THEME} to use as start theme
-     */
-    public static void install(Application application, THEME startTheme) {
-        Log.d(Utils.LOG_TAG, "attaching to " + application.getPackageName());
-        setDefaultThemesList(application);
-        String savedThemeTag = Utils.getSavedThemeTag(application);
-        if (savedThemeTag.equals(Utils.NO_KEY_VALUE) || getThemeByTag(savedThemeTag) == null) {
-            setActiveTheme(application, startTheme);
-        } else {
-            Log.d(Utils.LOG_TAG, "setting active theme with saved tag '" + savedThemeTag + "'");
-            setActiveTheme(application, savedThemeTag);
+    public static MultiThemer getInstance() {
+        if (INSTANCE == null) {
+            INSTANCE = new MultiThemer();
+            if (DEBUGGING) {
+                Log.d(Utils.LOG_TAG, "instance created");
+            }
         }
+        return INSTANCE;
     }
 
     /**
-     * Initializes MultiThemer with specified themes list.
-     * Uses specified tag to set start theme if saved tag won't found.
+     * Creates a builder instance for this class to initialize library.
      *
-     * @param application   {@link Application} instance
-     * @param themesList    {@link List<ColorTheme>} List of app themes
-     * @param startThemeTag Tag to set start theme
+     * @param application {@link Application} to attach to
+     * @return {@link Builder} to initialize the library with
      */
-    public static void install(Application application, List<ColorTheme> themesList, String startThemeTag) {
-        Log.d(Utils.LOG_TAG, "attaching to " + application.getPackageName());
-        clear();
-        for (ColorTheme theme : themesList) {
-            addTheme(theme);
-        }
-        String savedThemeTag = Utils.getSavedThemeTag(application);
-        if (savedThemeTag.equals(Utils.NO_KEY_VALUE) || getThemeByTag(savedThemeTag) == null) {
-            setActiveTheme(application, startThemeTag);
-        } else {
-            Log.d(Utils.LOG_TAG, "setting active theme with saved tag '" + savedThemeTag + "'");
-            setActiveTheme(application, savedThemeTag);
-        }
+    @NonNull
+    public static Builder build(Application application) {
+        return new Builder(application);
     }
 
     /**
-     * Sets {@link Bitmap} to use as app icon in recent apps list.
-     * Doesn't affect Android SDK below 21.
-     *
-     * @param context      {@link Context} instance
-     * @param appIconResID Drawable resource id to use as app icon
-     */
-    public static void useAppIcon(Context context, @DrawableRes int appIconResID) {
-        try {
-            mAppIcon = BitmapFactory.decodeResource(context.getResources(), appIconResID);
-        } catch (Exception e) {
-            mAppIcon = null;
-            Log.w(Utils.LOG_TAG, "app icon set fail", e);
-        }
-    }
-
-    /**
-     * Sets {@link Bitmap} to use as app icon in recent apps list.
-     * Doesn't affect Android SDK below 21.
-     *
-     * @param iconBitmap {@link Bitmap} to use as app icon
-     */
-    public static void useAppIcon(Bitmap iconBitmap) {
-        mAppIcon = iconBitmap;
-    }
-
-    /**
-     * Sets active theme to specified activity. If active theme is null,
-     * checks themes list and tries to set first theme from list.
+     * Sets active theme to specified activity.
      * <p>
      * {@link MultiThemeActivity} calls this method in {@link MultiThemeActivity#onCreate(Bundle)}
      *
-     * @param activity {@link Activity} instance
+     * @param activity {@link Activity} to set theme
      */
-    public static void applyTheme(Activity activity) {
+    public void applyTheme(Activity activity) {
+        checkInit();
+
         long startTime = System.currentTimeMillis();
 
         ColorTheme activeTheme = getActiveTheme();
-        if (activeTheme == null) {
-            Log.w(Utils.LOG_TAG, "active theme is null, no theme will be applied to activity");
-            return;
-        }
-
-        activity.setTheme(activeTheme.getStyleID());
+        activity.setTheme(activeTheme.getStyleResID());
 
         if (Build.VERSION.SDK_INT >= 21 && mAppIcon != null) {
             ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
@@ -174,35 +139,100 @@ public final class MultiThemer {
             activity.setTaskDescription(taskDescription);
         }
 
-        long time = System.currentTimeMillis() - startTime;
-        Log.d(Utils.LOG_TAG, "theme applied in " + time + " milliseconds to activity " + activity.toString());
+        if (DEBUGGING) {
+            long time = System.currentTimeMillis() - startTime;
+            Log.d(Utils.LOG_TAG, "theme applied in " + time + " milliseconds to activity " + activity.toString());
+        }
+
     }
 
-    @Nullable
-    public static List<ColorTheme> getThemesList() {
-        return mThemesList;
+    /**
+     * Checks for active theme and changes it to theme with specified tag if needed.
+     *
+     * @param tag {@link String} theme tag
+     */
+    public void changeTheme(String tag) {
+        changeTheme(getTheme(tag));
     }
 
-    @Nullable
-    public static ColorTheme getActiveTheme() {
-        return getThemeByTag(mActiveThemeTag);
+    /**
+     * Checks for active theme and changes it to theme with specified style resource id if needed.
+     *
+     * @param styleResourceId {@link StyleRes} theme style resource id
+     */
+    public void changeTheme(@StyleRes int styleResourceId) {
+        changeTheme(getTheme(styleResourceId));
+    }
+
+    /**
+     * Checks for active theme and changes it to specified theme if needed.
+     *
+     * @param theme {@link THEME} to set as active
+     */
+    public void changeTheme(THEME theme) {
+        changeTheme(getTheme(theme.TAG));
+    }
+
+    /**
+     * Checks for active theme and changes it to specified theme if needed.
+     *
+     * @param theme {@link ColorTheme} to set as active
+     */
+    public void changeTheme(ColorTheme theme) {
+        checkInit();
+
+        if (theme == null || !mThemes.contains(theme)) {
+            Log.w(Utils.LOG_TAG, "changing theme error");
+            return;
+        }
+
+        String savedTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
+        if (theme.getTag().equals(savedTag)) {
+            return;
+        }
+
+        if (DEBUGGING) {
+            Log.d(Utils.LOG_TAG, "changing theme to " + theme.toString());
+        }
+
+        mActiveTag = theme.getTag();
+        mPrefs.edit().putString(PREFERENCE_KEY, mActiveTag).apply();
+    }
+
+    public ColorTheme getActiveTheme() {
+        return getTheme(mActiveTag);
+    }
+
+    public List<ColorTheme> getThemesList() {
+        checkInit();
+        return mThemes;
+    }
+
+    public SharedPreferences getSharedPreferences() {
+        checkInit();
+        return mPrefs;
     }
 
     /**
      * Looks for theme with specified tag in themes list.
      * Returns theme if founded, or null.
      *
-     * @param themeTag Theme tag to find
+     * @param tag {@link String} theme tag to find
      * @return {@link ColorTheme} or null
      */
     @Nullable
-    public static ColorTheme getThemeByTag(String themeTag) {
-        for (ColorTheme theme : mThemesList) {
-            if (theme.getTag().equals(themeTag)) {
+    public ColorTheme getTheme(String tag) {
+        checkInit();
+
+        for (ColorTheme theme : mThemes) {
+            if (theme.getTag().equals(tag)) {
                 return theme;
             }
         }
-        Log.d(Utils.LOG_TAG, "theme with tag '" + themeTag + "' not found");
+
+        if (DEBUGGING) {
+            Log.d(Utils.LOG_TAG, "theme with tag '" + tag + "' not found");
+        }
         return null;
     }
 
@@ -210,136 +240,81 @@ public final class MultiThemer {
      * Looks for theme with specified style resource id in themes list.
      * Returns theme if founded, or null.
      *
-     * @param styleID Style resource id to find
+     * @param styleResourceId {@link StyleRes} style resource id to find
      * @return {@link ColorTheme} or null
      */
     @Nullable
-    public static ColorTheme getThemeByStyleID(@StyleRes int styleID) {
-        for (ColorTheme theme : mThemesList) {
-            if (theme.getStyleID() == styleID) {
+    public ColorTheme getTheme(@StyleRes int styleResourceId) {
+        checkInit();
+
+        for (ColorTheme theme : mThemes) {
+            if (theme.getStyleResID() == styleResourceId) {
                 return theme;
             }
         }
-        Log.d(Utils.LOG_TAG, "theme with style id '" + styleID + "' not found");
+
+        if (DEBUGGING) {
+            Log.d(Utils.LOG_TAG, "theme with style resource id " + styleResourceId + " not found");
+        }
         return null;
     }
 
     /**
-     * Adds new {@link THEME} to themes list if it doesn't contain it.
+     * Initializes MultiThemer with specified {@link Builder}.
      *
-     * @param context {@link Context} instance
-     * @param theme   {@link THEME} to add
+     * @param builder {@link Builder} instance
      */
-    public static void addTheme(Context context, THEME theme) {
-        addTheme(theme.toColorTheme(context));
-    }
+    private void install(Builder builder) {
+        if (builder.themes.isEmpty()) {
+            throw new IllegalStateException("MultiThemer themes list is empty!");
+        }
 
-    /**
-     * Adds new {@link ColorTheme} to themes list with specified tag
-     * and style resource id if it doesn't contain it.
-     *
-     * @param context {@link Context} instance
-     * @param tag     Theme tag
-     * @param styleID Theme style resource id
-     */
-    public static void addTheme(Context context, String tag, @StyleRes int styleID) {
-        addTheme(new ColorTheme(context, tag, styleID));
-    }
+        mPrefs = builder.prefs;
+        mThemes = new ArrayList<>(builder.themes);
+        mAppIcon = builder.icon;
 
-    /**
-     * Adds new {@link ColorTheme} to themes list if it doesn't contain it.
-     *
-     * @param theme {@link ColorTheme} to add
-     */
-    public static void addTheme(ColorTheme theme) {
-        if (notInList(theme)) {
-            mThemesList.add(theme);
-            Log.d(Utils.LOG_TAG, "theme " + theme.toString() + " added to list");
+        String savedTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
+        if (savedTag.equals(PREFERENCE_NO_VALUE) || !checkTheme(savedTag)) {
+            Log.i(Utils.LOG_TAG, "theme with saved tag not found");
+            if (!checkTheme(builder.defaultTag)) {
+                throw new IllegalStateException("theme with tag '" + builder.defaultTag + "' not found");
+            }
+            Log.i(Utils.LOG_TAG, "saving tag '" + builder.defaultTag + "' as default");
+            mActiveTag = builder.defaultTag;
+            mPrefs.edit().putString(PREFERENCE_KEY, builder.defaultTag).apply();
         } else {
-            Log.d(Utils.LOG_TAG, "theme " + theme.toString() + " was not added to list");
+            Log.i(Utils.LOG_TAG, "restoring theme with saved tag '" + savedTag + "'");
+            mActiveTag = savedTag;
         }
+
+        mInitialized = true;
+
+        if (DEBUGGING) {
+            long time = System.currentTimeMillis() - builder.startTime;
+            Log.d(Utils.LOG_TAG, "MultiThemer initialized in "
+                    + time + " milliseconds to "
+                    + builder.application.getPackageName());
+        }
+    }
+
+    private void checkInit() {
+        if (!mInitialized) {
+            throw new IllegalStateException("MultiThemer is not initialized!");
+        }
+    }
+
+    private boolean checkTheme(String tag) {
+        for (ColorTheme theme : mThemes) {
+            if (theme.getTag().equals(tag)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
-     * Sets specified {@link THEME} as active theme if it is in themes list.
-     *
-     * @param context {@link Context} instance
-     * @param theme   {@link THEME} to set
+     * Enumeration of predefined by library themes
      */
-    public static void setActiveTheme(Context context, THEME theme) {
-        setActiveTheme(context, theme.TAG);
-    }
-
-    /**
-     * Sets specified {@link ColorTheme} as active theme if it is in themes list.
-     *
-     * @param context {@link Context} instance
-     * @param theme   {@link ColorTheme} to set
-     */
-    public static void setActiveTheme(Context context, ColorTheme theme) {
-        setActiveTheme(context, theme.getTag());
-    }
-
-    /**
-     * Sets theme with specified tag as active theme if it is in themes list.
-     *
-     * @param context  {@link Context} instance
-     * @param themeTag Theme tag
-     */
-    public static void setActiveTheme(Context context, String themeTag) {
-        if (mActiveThemeTag != null && mActiveThemeTag.equals(themeTag)) {
-            return;
-        }
-        if (getThemeByTag(themeTag) != null) {
-            mActiveThemeTag = themeTag;
-            Utils.saveThemeTag(context, themeTag);
-        } else {
-            Log.w(Utils.LOG_TAG, "error set active theme, theme with tag '" + themeTag + "' not found");
-        }
-    }
-
-    /**
-     * Clears themes list and sets active theme tag to null.
-     */
-    public static void clear() {
-        mThemesList = new LinkedList<>();
-        mActiveThemeTag = null;
-        Log.d(Utils.LOG_TAG, "themes list has been cleared, active theme tag set to null");
-    }
-
-    private static void setDefaultThemesList(Context context) {
-        Log.d(Utils.LOG_TAG, "setting default themes list");
-        clear();
-        addTheme(context, THEME.RED);
-        addTheme(context, THEME.PINK);
-        addTheme(context, THEME.PURPLE);
-        addTheme(context, THEME.DEEP_PURPLE);
-        addTheme(context, THEME.INDIGO);
-        addTheme(context, THEME.BLUE);
-        addTheme(context, THEME.LIGHT_BLUE);
-        addTheme(context, THEME.CYAN);
-        addTheme(context, THEME.TEAL);
-        addTheme(context, THEME.GREEN);
-        addTheme(context, THEME.LIGHT_GREEN);
-        addTheme(context, THEME.LIME);
-        addTheme(context, THEME.YELLOW);
-        addTheme(context, THEME.AMBER);
-        addTheme(context, THEME.ORANGE);
-        addTheme(context, THEME.DEEP_ORANGE);
-    }
-
-    private static boolean notInList(ColorTheme theme) {
-        if (getThemeByTag(theme.getTag()) != null) {
-            Log.i(Utils.LOG_TAG, "theme with tag '" + theme.getTag() + "' already in list");
-            return false;
-        }
-        if (getThemeByStyleID(theme.getStyleID()) != null) {
-            Log.i(Utils.LOG_TAG, "theme with styleID '" + theme.getStyleID() + "' already in list");
-            return false;
-        }
-        return true;
-    }
-
     public enum THEME {
         RED("Red", R.style.MultiThemer_Red),
         PINK("Pink", R.style.MultiThemer_Pink),
@@ -360,20 +335,206 @@ public final class MultiThemer {
 
         public final String TAG;
         @StyleRes
-        public final int STYLE_ID;
+        public final int STYLE_RES_ID;
 
-        THEME(String tag, @StyleRes int styleID) {
+        THEME(String tag, @StyleRes int styleResourceId) {
             TAG = tag;
-            STYLE_ID = styleID;
+            STYLE_RES_ID = styleResourceId;
         }
 
         public ColorTheme toColorTheme(Context context) {
-            return new ColorTheme(context, TAG, STYLE_ID);
+            return new ColorTheme(context, TAG, STYLE_RES_ID);
         }
 
         @Override
         public String toString() {
-            return "{ Tag: '" + TAG + "', StyleID: '" + STYLE_ID + "' }";
+            return "THEME { TAG='" + TAG + "'; STYLE_RES_ID=" + STYLE_RES_ID + " }";
         }
     }
+
+    /**
+     * Initialization builder
+     */
+    public static class Builder {
+        private final List<ColorTheme> themes;
+        private SharedPreferences prefs;
+        private String defaultTag;
+        private Bitmap icon;
+        private Application application;
+        private long startTime;
+
+        Builder(@NonNull Application application) {
+            startTime = System.currentTimeMillis();
+            this.application = application;
+            themes = new ArrayList<>();
+        }
+
+        /**
+         * Adds {@link THEME} to themes list.
+         *
+         * @param theme {@link THEME} to add
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(THEME theme) {
+            return addTheme(theme, false);
+        }
+
+        /**
+         * Adds {@link THEME} to themes list and sets it as default by {@code isDefault} flag.
+         *
+         * @param theme     {@link THEME} to add
+         * @param isDefault flag to use theme as default
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(THEME theme, boolean isDefault) {
+            return addTheme(theme.toColorTheme(application), isDefault);
+        }
+
+        /**
+         * Adds {@link ColorTheme} to themes list.
+         *
+         * @param theme {@link ColorTheme} to add
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(ColorTheme theme) {
+            return addTheme(theme, false);
+        }
+
+        /**
+         * Adds {@link ColorTheme} to themes list and sets it as default by {@code isDefault} flag.
+         *
+         * @param theme     {@link ColorTheme} to add
+         * @param isDefault flag to use theme as default
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(ColorTheme theme, boolean isDefault) {
+            checkForDuplicates(theme);
+
+            if (isDefault) {
+                defaultTag = theme.getTag();
+            }
+            themes.add(theme);
+
+            if (DEBUGGING) {
+                Log.d(Utils.LOG_TAG, "theme " + theme.toString() + " added to list");
+            }
+            return this;
+        }
+
+        /**
+         * Adds {@link ColorTheme} to themes list with specified tag and style resource id.
+         *
+         * @param tag             {@link String} theme tag
+         * @param styleResourceId {@link StyleRes} theme style resource id
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(String tag, @StyleRes int styleResourceId) {
+            return addTheme(tag, styleResourceId, false);
+        }
+
+        /**
+         * Adds {@link ColorTheme} to themes list with specified tag and style resource id
+         * and sets it as default by {@code isDefault} flag.
+         *
+         * @param tag             {@link String} theme tag
+         * @param styleResourceId {@link StyleRes} theme style resource id
+         * @param isDefault       flag to use theme as default
+         * @return this {@link Builder}
+         */
+        public Builder addTheme(String tag, @StyleRes int styleResourceId, boolean isDefault) {
+            ColorTheme theme = new ColorTheme(application, tag, styleResourceId);
+            return addTheme(theme, isDefault);
+        }
+
+        /**
+         * Sets specified {@link THEME} to use as default theme.
+         *
+         * @param theme {@link THEME}
+         * @return this {@link Builder}
+         */
+        public Builder setDefault(THEME theme) {
+            defaultTag = theme.TAG;
+            return this;
+        }
+
+        /**
+         * Sets specified {@link DrawableRes} to use as app icon in recent apps list.
+         * Doesn't affect Android SDK below 21.
+         *
+         * @param iconResourceId {@link DrawableRes} resource id to use as app icon
+         * @return this {@link Builder}
+         */
+        public Builder useAppIcon(@DrawableRes int iconResourceId) {
+            icon = BitmapFactory.decodeResource(application.getResources(), iconResourceId);
+            return this;
+        }
+
+        /**
+         * Sets specified {@link Bitmap} to use as app icon in recent apps list.
+         * Doesn't affect Android SDK below 21.
+         *
+         * @param iconBitmap {@link Bitmap} to use as app icon
+         * @return this {@link Builder}
+         */
+        public Builder useAppIcon(Bitmap iconBitmap) {
+            icon = iconBitmap;
+            return this;
+        }
+
+        /**
+         * Sets specified {@link SharedPreferences} that will be used to save theme tag after theme change.
+         *
+         * @param prefs {@link SharedPreferences} instance
+         * @return this {@link Builder}
+         */
+        public Builder setSharedPreferences(SharedPreferences prefs) {
+            this.prefs = prefs;
+            return this;
+        }
+
+        /**
+         * Method to initialize {@link MultiThemer} instance.
+         * Will set {@link THEME#INDIGO} as default theme if saved tag won't found.
+         */
+        public void initialize() {
+            if (prefs == null) {
+                prefs = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
+            }
+            if (themes.isEmpty()) {
+                Log.i(Utils.LOG_TAG, "no themes was added, initializing with default themes list");
+                for (THEME theme : THEME.values()) {
+                    addTheme(theme);
+                }
+                if (defaultTag == null) {
+                    defaultTag = THEME.INDIGO.TAG;
+                }
+            }
+            if (defaultTag == null) {
+                throw new IllegalStateException("default theme wasn't set");
+            }
+            MultiThemer.getInstance().install(this);
+        }
+
+        private void checkForDuplicates(ColorTheme theme) {
+            String tag = theme.getTag();
+            for (ColorTheme colorTheme : themes) {
+                if (colorTheme.getTag().equals(tag)) {
+                    throw new IllegalStateException(
+                            "duplicate themes with tag '" + tag + "' found in themes list"
+                    );
+                }
+            }
+
+            int styleResId = theme.getStyleResID();
+            for (ColorTheme colorTheme : themes) {
+                if (colorTheme.getStyleResID() == styleResId) {
+                    throw new IllegalStateException(
+                            "duplicate themes with style resource id " + styleResId + " found in themes list"
+                    );
+                }
+            }
+        }
+
+    }
+
 }
