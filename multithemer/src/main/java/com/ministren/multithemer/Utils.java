@@ -10,7 +10,7 @@ import android.support.annotation.StyleRes;
  * Created by Mini-Stren on 06.01.2017
  */
 
-final class Utils {
+public final class Utils {
 
     static String LOG_TAG = "MultiThemer";
 
@@ -19,10 +19,15 @@ final class Utils {
     }
 
     @ColorInt
-    static int getColorStyleAttr(Context context, @StyleRes int styleID, @AttrRes int attr) {
-        TypedArray typedArray = context.obtainStyledAttributes(styleID, new int[]{attr});
+    public static int getColorStyleAttr(Context context, @StyleRes int styleResId, @AttrRes int attr) {
+        TypedArray typedArray = context.obtainStyledAttributes(styleResId, new int[]{attr});
         int color = typedArray.getColor(0, 0);
         typedArray.recycle();
         return color;
+    }
+
+    @ColorInt
+    public static int getColorThemeAttr(ColorTheme theme, @AttrRes int attr) {
+        return getColorStyleAttr(theme.getContext(), theme.getStyleResID(), attr);
     }
 }

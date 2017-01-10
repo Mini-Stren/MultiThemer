@@ -1,1 +1,4 @@
-<manifest package="com.ministren.multithemer" />
+<manifest package="com.ministren.multithemer">
+
+    <application />
+</manifest>

@@ -10,31 +10,15 @@ import android.support.annotation.StyleRes;
 
 public class ColorTheme {
 
+    private Context CONTEXT;
     private String TAG;
     @StyleRes
     private int STYLE_RES_ID;
-    @ColorInt
-    private int COLOR_PRIMARY;
-    @ColorInt
-    private int COLOR_PRIMARY_DARK;
-    @ColorInt
-    private int COLOR_ACCENT;
-    @ColorInt
-    private int TEXT_COLOR_PRIMARY;
-    @ColorInt
-    private int TEXT_COLOR_PRIMARY_DARK;
-    @ColorInt
-    private int TEXT_COLOR_ACCENT;
 
     public ColorTheme(Context context, String tag, @StyleRes int styleResID) {
+        CONTEXT = context;
         TAG = tag;
         STYLE_RES_ID = styleResID;
-        COLOR_PRIMARY = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.colorPrimary);
-        COLOR_PRIMARY_DARK = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.colorPrimaryDark);
-        COLOR_ACCENT = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.colorAccent);
-        TEXT_COLOR_PRIMARY = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.themeTextColorPrimary);
-        TEXT_COLOR_PRIMARY_DARK = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.themeTextColorPrimaryDark);
-        TEXT_COLOR_ACCENT = Utils.getColorStyleAttr(context, STYLE_RES_ID, R.attr.themeTextColorAccent);
     }
 
     @Override
@@ -53,31 +37,35 @@ public class ColorTheme {
 
     @ColorInt
     public int getColorPrimary() {
-        return COLOR_PRIMARY;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorPrimary);
     }
 
     @ColorInt
     public int getColorPrimaryDark() {
-        return COLOR_PRIMARY_DARK;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorPrimaryDark);
     }
 
     @ColorInt
     public int getColorAccent() {
-        return COLOR_ACCENT;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorAccent);
     }
 
     @ColorInt
     public int getTextColorPrimary() {
-        return TEXT_COLOR_PRIMARY;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorPrimary);
     }
 
     @ColorInt
     public int getTextColorPrimaryDark() {
-        return TEXT_COLOR_PRIMARY_DARK;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorPrimaryDark);
     }
 
     @ColorInt
     public int getTextColorAccent() {
-        return TEXT_COLOR_ACCENT;
+        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorAccent);
+    }
+
+    Context getContext() {
+        return CONTEXT;
     }
 }

@@ -20,18 +20,13 @@ public class MultiThemeActivity extends AppCompatActivity implements SharedPrefe
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         MultiThemer.getInstance().applyTheme(this);
+        MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
-        MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onDestroy() {
+        super.onDestroy();
         MultiThemer.getInstance().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
     }
 
