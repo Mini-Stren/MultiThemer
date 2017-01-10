@@ -17,3 +17,7 @@ ext {
     compileSdkVersion = 25
     buildToolsVersion = "25.0.2"
 }
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
