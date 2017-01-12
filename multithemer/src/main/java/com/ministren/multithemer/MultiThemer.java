@@ -1,3 +1,24 @@
+/*
+ * Copyright (C) 2015 Mini-Stren.
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing,
+ * software distributed under the License is distributed on an
+ * "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied.  See the License for the
+ * specific language governing permissions and limitations
+ * under the License.
+ */
+
 package com.ministren.multithemer;
 
 import android.app.Activity;
@@ -158,7 +179,7 @@ public class MultiThemer {
     /**
      * Checks for active theme and changes it to theme with specified style resource id if needed.
      *
-     * @param styleResourceId {@link StyleRes} theme style resource id
+     * @param styleResourceId theme style resource id
      */
     public void changeTheme(@StyleRes int styleResourceId) {
         changeTheme(getTheme(styleResourceId));
@@ -240,7 +261,7 @@ public class MultiThemer {
      * Looks for theme with specified style resource id in themes list.
      * Returns theme if founded, or null.
      *
-     * @param styleResourceId {@link StyleRes} style resource id to find
+     * @param styleResourceId style resource id to find
      * @return {@link ColorTheme} or null
      */
     @Nullable
@@ -425,7 +446,7 @@ public class MultiThemer {
          * Adds {@link ColorTheme} to themes list with specified tag and style resource id.
          *
          * @param tag             {@link String} theme tag
-         * @param styleResourceId {@link StyleRes} theme style resource id
+         * @param styleResourceId theme style resource id
          * @return this {@link Builder}
          */
         public Builder addTheme(String tag, @StyleRes int styleResourceId) {
@@ -437,7 +458,7 @@ public class MultiThemer {
          * and sets it as default by {@code isDefault} flag.
          *
          * @param tag             {@link String} theme tag
-         * @param styleResourceId {@link StyleRes} theme style resource id
+         * @param styleResourceId theme style resource id
          * @param isDefault       flag to use theme as default
          * @return this {@link Builder}
          */
@@ -458,10 +479,10 @@ public class MultiThemer {
         }
 
         /**
-         * Sets specified {@link DrawableRes} to use as app icon in recent apps list.
+         * Sets specified drawable resource id to use as app icon in recent apps list.
          * Doesn't affect Android SDK below 21.
          *
-         * @param iconResourceId {@link DrawableRes} resource id to use as app icon
+         * @param iconResourceId drawable resource id to use as app icon
          * @return this {@link Builder}
          */
         public Builder useAppIcon(@DrawableRes int iconResourceId) {
