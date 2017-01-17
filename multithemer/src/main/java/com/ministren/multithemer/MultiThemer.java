@@ -47,7 +47,7 @@ import java.util.List;
  * 1. Extend activity from {@link MultiThemeActivity} to let it
  * automatically apply app's active theme and restart after theme change.
  * <p>
- * 2. Define your themes in {@code styles.xml}, or use up to 16 predefined themes in {@link THEME}
+ * 2. Define your themes in {@code styles.xml}, or use up to 20 predefined themes in {@link THEME}
  * <p>
  * 3. Initialize {@link MultiThemer} in your {@link Application} class using method {@link #build(Application)}
  * <p>
@@ -61,29 +61,19 @@ import java.util.List;
  * It will use {@link THEME#INDIGO} as default theme,
  * or you can change it with {@link Builder#setDefault(THEME)}
  * <p>
- * 3.3. While adding your own themes using {@link Builder}{@code .addTheme()} methods,
- * don't forget to use for at least one theme method with parameter {@code isDefault}
+ * 3.3. While adding your own themes using one of {@link Builder}{@code .addTheme()} methods,
+ * don't forget to use for at least one {@code .addTheme()} method with parameter {@code isDefault}
  * <p>
  * 3.4. {@link Builder#setSharedPreferences(SharedPreferences)} is optional.
  * {@code DefaultSharedPreferences} will be used by default.
  * <p>
- * While defining your own themes in {@code styles.xml}, you can use following attributes:
- * {@code themeTextColorPrimary}, {@code themeTextColorPrimaryDark}, {@code themeTextColorAccent}
- * to set better text colors and use them in xml like that:
- * {@code ?attr/themeTextColorAccent}
- * or get them in code by calling
- * {@link ColorTheme#getTextColorPrimary()},
- * {@link ColorTheme#getTextColorPrimaryDark()},
- * {@link ColorTheme#getTextColorAccent()}
- * <p>
  * You can use {@link MultiThemerListFragment} to present all app's themes
- * and give users easy way to switch between themes.
+ * and give users easy way to switch between themes,
+ * or use {@link #getThemesList()} and {@link #getActiveTheme()} to write your own theme chooser.
  * <p>
  * See also:
  * <p>
  * {@link Builder#useAppIcon(int)} and {@link Builder#useAppIcon(Bitmap)}
- * <p>
- * {@link #getThemesList()} and {@link #getActiveTheme()}
  * <p>
  * {@link THEME} and {@link ColorTheme}
  * <p>
@@ -98,8 +88,8 @@ import java.util.List;
 public class MultiThemer {
 
     public static String PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG";
-    private static String PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE";
-    private static boolean DEBUGGING = false;
+    public static String PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE";
+    static String LOG_TAG = "MultiThemer";
 
     private static MultiThemer INSTANCE = null;
     private List<ColorTheme> mThemes;
@@ -111,15 +101,11 @@ public class MultiThemer {
     private MultiThemer() {
     }
 
-    public static void setDebug(boolean flag) {
-        DEBUGGING = flag;
-    }
-
     public static MultiThemer getInstance() {
         if (INSTANCE == null) {
             INSTANCE = new MultiThemer();
-            if (DEBUGGING) {
-                Log.d(Utils.LOG_TAG, "instance created");
+            if (BuildConfig.DEBUG) {
+                Log.d(LOG_TAG, "instance created");
             }
         }
         return INSTANCE;
@@ -153,16 +139,15 @@ public class MultiThemer {
 
         if (Build.VERSION.SDK_INT >= 21 && mAppIcon != null) {
             ActivityManager.TaskDescription taskDescription = new ActivityManager.TaskDescription(
-                    null, mAppIcon, activeTheme.getColorPrimaryDark()
+                    null, mAppIcon, activeTheme.getAttrColor(R.attr.colorPrimary)
             );
             activity.setTaskDescription(taskDescription);
         }
 
-        if (DEBUGGING) {
+        if (BuildConfig.DEBUG) {
             long time = System.currentTimeMillis() - startTime;
-            Log.d(Utils.LOG_TAG, "theme applied in " + time + " milliseconds to activity " + activity.toString());
+            Log.d(LOG_TAG, "theme applied in " + time + " milliseconds to activity " + activity.toString());
         }
-
     }
 
     /**
@@ -201,7 +186,7 @@ public class MultiThemer {
         checkInit();
 
         if (theme == null || !mThemes.contains(theme)) {
-            Log.w(Utils.LOG_TAG, "changing theme error");
+            Log.w(LOG_TAG, "changing theme error");
             return;
         }
 
@@ -210,8 +195,8 @@ public class MultiThemer {
             return;
         }
 
-        if (DEBUGGING) {
-            Log.d(Utils.LOG_TAG, "changing theme to " + theme.toString());
+        if (BuildConfig.DEBUG) {
+            Log.d(LOG_TAG, "changing theme to " + theme.toString());
         }
 
         mActiveTag = theme.getTag();
@@ -249,8 +234,8 @@ public class MultiThemer {
             }
         }
 
-        if (DEBUGGING) {
-            Log.d(Utils.LOG_TAG, "theme with tag '" + tag + "' not found");
+        if (BuildConfig.DEBUG) {
+            Log.d(LOG_TAG, "theme with tag '" + tag + "' not found");
         }
         return null;
     }
@@ -272,8 +257,8 @@ public class MultiThemer {
             }
         }
 
-        if (DEBUGGING) {
-            Log.d(Utils.LOG_TAG, "theme with style resource id " + styleResourceId + " not found");
+        if (BuildConfig.DEBUG) {
+            Log.d(LOG_TAG, "theme with style resource id " + styleResourceId + " not found");
         }
         return null;
     }
@@ -294,23 +279,23 @@ public class MultiThemer {
 
         String savedTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
         if (savedTag.equals(PREFERENCE_NO_VALUE) || !checkTheme(savedTag)) {
-            Log.i(Utils.LOG_TAG, "theme with saved tag not found");
+            Log.i(LOG_TAG, "theme with saved tag not found");
             if (!checkTheme(builder.defaultTag)) {
                 throw new IllegalStateException("theme with tag '" + builder.defaultTag + "' not found");
             }
-            Log.i(Utils.LOG_TAG, "saving tag '" + builder.defaultTag + "' as default");
+            Log.i(LOG_TAG, "saving tag '" + builder.defaultTag + "' as default");
             mActiveTag = builder.defaultTag;
             mPrefs.edit().putString(PREFERENCE_KEY, builder.defaultTag).apply();
         } else {
-            Log.i(Utils.LOG_TAG, "restoring theme with saved tag '" + savedTag + "'");
+            Log.i(LOG_TAG, "restoring theme with saved tag '" + savedTag + "'");
             mActiveTag = savedTag;
         }
 
         mInitialized = true;
 
-        if (DEBUGGING) {
+        if (BuildConfig.DEBUG) {
             long time = System.currentTimeMillis() - builder.startTime;
-            Log.d(Utils.LOG_TAG, "MultiThemer initialized in "
+            Log.d(LOG_TAG, "MultiThemer initialized in "
                     + time + " milliseconds to "
                     + builder.application.getPackageName());
         }
@@ -350,7 +335,11 @@ public class MultiThemer {
         YELLOW("Yellow", R.style.MultiThemer_Yellow),
         AMBER("Amber", R.style.MultiThemer_Amber),
         ORANGE("Orange", R.style.MultiThemer_Orange),
-        DEEP_ORANGE("Deep Orange", R.style.MultiThemer_DeepOrange);
+        DEEP_ORANGE("Deep Orange", R.style.MultiThemer_DeepOrange),
+        BROWN("Brown", R.style.MultiThemer_Brown),
+        GREY("Grey", R.style.MultiThemer_Grey),
+        BLUE_GREY("Blue Grey", R.style.MultiThemer_BlueGrey),
+        BLACK("Black", R.style.MultiThemer_Black);
 
         public final String TAG;
         @StyleRes
@@ -434,8 +423,8 @@ public class MultiThemer {
             }
             themes.add(theme);
 
-            if (DEBUGGING) {
-                Log.d(Utils.LOG_TAG, "theme " + theme.toString() + " added to list");
+            if (BuildConfig.DEBUG) {
+                Log.d(LOG_TAG, "theme " + theme.toString() + " added to list");
             }
             return this;
         }
@@ -520,7 +509,7 @@ public class MultiThemer {
                 prefs = PreferenceManager.getDefaultSharedPreferences(application.getApplicationContext());
             }
             if (themes.isEmpty()) {
-                Log.i(Utils.LOG_TAG, "no themes was added, initializing with default themes list");
+                Log.i(LOG_TAG, "no themes was added, initializing with default themes list");
                 for (THEME theme : THEME.values()) {
                     addTheme(theme);
                 }

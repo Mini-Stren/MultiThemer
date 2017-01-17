@@ -20,6 +20,8 @@
 package com.ministren.multithemer;
 
 import android.content.Context;
+import android.content.res.TypedArray;
+import android.support.annotation.AttrRes;
 import android.support.annotation.ColorInt;
 import android.support.annotation.StyleRes;
 
@@ -54,37 +56,15 @@ public class ColorTheme {
         return STYLE_RES_ID;
     }
 
-    @ColorInt
-    public int getColorPrimary() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorPrimary);
-    }
-
-    @ColorInt
-    public int getColorPrimaryDark() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorPrimaryDark);
-    }
-
-    @ColorInt
-    public int getColorAccent() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.colorAccent);
-    }
-
-    @ColorInt
-    public int getTextColorPrimary() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorPrimary);
-    }
-
-    @ColorInt
-    public int getTextColorPrimaryDark() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorPrimaryDark);
-    }
-
-    @ColorInt
-    public int getTextColorAccent() {
-        return Utils.getColorStyleAttr(CONTEXT, STYLE_RES_ID, R.attr.themeTextColorAccent);
-    }
-
-    Context getContext() {
+    public Context getContext() {
         return CONTEXT;
+    }
+
+    @ColorInt
+    public int getAttrColor(@AttrRes int attr) {
+        TypedArray typedArray = CONTEXT.obtainStyledAttributes(STYLE_RES_ID, new int[]{attr});
+        int color = typedArray.getColor(0, 0);
+        typedArray.recycle();
+        return color;
     }
 }

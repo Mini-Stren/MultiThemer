@@ -44,8 +44,7 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
     public void onBindViewHolder(ViewHolder holder, int position) {
         ColorTheme theme = MultiThemer.getInstance().getThemesList().get(position);
         holder.textView.setText(theme.getTag());
-        holder.textView.setTextColor(theme.getTextColorPrimary());
-        holder.cardView.setCardBackgroundColor(theme.getColorPrimary());
+        holder.cardView.setCardBackgroundColor(theme.getAttrColor(R.attr.colorPrimary));
 
         ColorTheme activeTheme = MultiThemer.getInstance().getActiveTheme();
         if (activeTheme != null

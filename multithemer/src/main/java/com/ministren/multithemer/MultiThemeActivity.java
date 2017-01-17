@@ -35,31 +35,50 @@ import android.util.Log;
  */
 
 public class MultiThemeActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+    private String themeTag;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         MultiThemer.getInstance().applyTheme(this);
-        MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        themeTag = MultiThemer.getInstance().getSharedPreferences()
+                .getString(MultiThemer.PREFERENCE_KEY, MultiThemer.PREFERENCE_NO_VALUE);
         super.onCreate(savedInstanceState);
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
         MultiThemer.getInstance().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
+        String tag = MultiThemer.getInstance().getSharedPreferences()
+                .getString(MultiThemer.PREFERENCE_KEY, MultiThemer.PREFERENCE_NO_VALUE);
+        if (!themeTag.equals(tag)) {
+            restartActivity();
+        }
     }
 
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
         if (s.equals(MultiThemer.PREFERENCE_KEY)) {
-            Log.d(Utils.LOG_TAG, "theme change detected in activity " + toString());
-            if (Build.VERSION.SDK_INT >= 11) {
-                recreate();
-            } else {
-                Intent intent = getIntent();
-                finish();
-                startActivity(intent);
-            }
+            restartActivity();
+        }
+    }
+
+    public void restartActivity() {
+        if (BuildConfig.DEBUG) {
+            Log.d(MultiThemer.LOG_TAG, "restarting activity " + toString());
+        }
+        if (Build.VERSION.SDK_INT >= 11) {
+            recreate();
+        } else {
+            Intent intent = getIntent();
+            finish();
+            startActivity(intent);
         }
     }
 }

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <attr name="themeTextColorPrimary" format="color|reference" />
-    <attr name="themeTextColorPrimaryDark" format="color|reference" />
-    <attr name="themeTextColorAccent" format="color|reference" />
-</resources>
