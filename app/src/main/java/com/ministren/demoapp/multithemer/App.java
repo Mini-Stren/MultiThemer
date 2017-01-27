@@ -10,8 +10,6 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-//        MultiThemer.setDebug(true);
-
         installDefaultsWithIcon();
 //        installDefaultsWithoutIcon();
 //        installDefaultsWithRed();

@@ -27,11 +27,15 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.List;
+
 /**
  * Created by Mini-Stren on 06.01.2017
  */
 
 class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewHolder> {
+
+    private List<ColorTheme> themesList = MultiThemer.getInstance().getThemesList();
 
     @Override
     public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -42,14 +46,12 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        ColorTheme theme = MultiThemer.getInstance().getThemesList().get(position);
+        ColorTheme theme = themesList.get(position);
         holder.textView.setText(theme.getTag());
         holder.cardView.setCardBackgroundColor(theme.getAttrColor(R.attr.colorPrimary));
 
         ColorTheme activeTheme = MultiThemer.getInstance().getActiveTheme();
-        if (activeTheme != null
-                && activeTheme.getTag().equals(theme.getTag())
-                && activeTheme.getStyleResID() == theme.getStyleResID()) {
+        if (theme == activeTheme) {
             holder.checkCircle.setVisibility(View.VISIBLE);
         } else {
             holder.checkCircle.setVisibility(View.GONE);
@@ -58,7 +60,7 @@ class ListFragmentAdapter extends RecyclerView.Adapter<ListFragmentAdapter.ViewH
 
     @Override
     public int getItemCount() {
-        return MultiThemer.getInstance().getThemesList().size();
+        return themesList.size();
     }
 
     static class ViewHolder extends RecyclerView.ViewHolder {

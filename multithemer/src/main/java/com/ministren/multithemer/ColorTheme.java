@@ -67,4 +67,19 @@ public class ColorTheme {
         typedArray.recycle();
         return color;
     }
+
+    @ColorInt
+    public int getColorPrimary() {
+        return getAttrColor(R.attr.colorPrimary);
+    }
+
+    @ColorInt
+    public int getColorPrimaryDark() {
+        return getAttrColor(R.attr.colorPrimaryDark);
+    }
+
+    @ColorInt
+    public int getColorAccent() {
+        return getAttrColor(R.attr.colorAccent);
+    }
 }

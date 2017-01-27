@@ -35,13 +35,13 @@ import android.util.Log;
  */
 
 public class MultiThemeActivity extends AppCompatActivity implements SharedPreferences.OnSharedPreferenceChangeListener {
+
     private String themeTag;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         MultiThemer.getInstance().applyTheme(this);
-        themeTag = MultiThemer.getInstance().getSharedPreferences()
-                .getString(MultiThemer.PREFERENCE_KEY, MultiThemer.PREFERENCE_NO_VALUE);
+        themeTag = MultiThemer.getInstance().getSavedTag();
         super.onCreate(savedInstanceState);
     }
 
@@ -55,8 +55,7 @@ public class MultiThemeActivity extends AppCompatActivity implements SharedPrefe
     protected void onResume() {
         super.onResume();
         MultiThemer.getInstance().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
-        String tag = MultiThemer.getInstance().getSharedPreferences()
-                .getString(MultiThemer.PREFERENCE_KEY, MultiThemer.PREFERENCE_NO_VALUE);
+        String tag = MultiThemer.getInstance().getSavedTag();
         if (!themeTag.equals(tag)) {
             restartActivity();
         }

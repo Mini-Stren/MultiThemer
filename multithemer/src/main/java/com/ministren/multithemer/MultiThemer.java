@@ -91,7 +91,7 @@ public class MultiThemer {
     public static String PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE";
     static String LOG_TAG = "MultiThemer";
 
-    private static MultiThemer INSTANCE = null;
+    private static MultiThemer mInstance = null;
     private List<ColorTheme> mThemes;
     private SharedPreferences mPrefs;
     private String mActiveTag;
@@ -102,13 +102,13 @@ public class MultiThemer {
     }
 
     public static MultiThemer getInstance() {
-        if (INSTANCE == null) {
-            INSTANCE = new MultiThemer();
+        if (mInstance == null) {
+            mInstance = new MultiThemer();
             if (BuildConfig.DEBUG) {
                 Log.d(LOG_TAG, "instance created");
             }
         }
-        return INSTANCE;
+        return mInstance;
     }
 
     /**
@@ -190,7 +190,7 @@ public class MultiThemer {
             return;
         }
 
-        String savedTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
+        String savedTag = getSavedTag();
         if (theme.getTag().equals(savedTag)) {
             return;
         }
@@ -205,6 +205,10 @@ public class MultiThemer {
 
     public ColorTheme getActiveTheme() {
         return getTheme(mActiveTag);
+    }
+
+    public String getSavedTag() {
+        return mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
     }
 
     public List<ColorTheme> getThemesList() {
@@ -277,7 +281,7 @@ public class MultiThemer {
         mThemes = new ArrayList<>(builder.themes);
         mAppIcon = builder.icon;
 
-        String savedTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE);
+        String savedTag = getSavedTag();
         if (savedTag.equals(PREFERENCE_NO_VALUE) || !checkTheme(savedTag)) {
             Log.i(LOG_TAG, "theme with saved tag not found");
             if (!checkTheme(builder.defaultTag)) {
