@@ -1,5 +1,17 @@
 # MultiThemer
+
+[ ![Download](https://api.bintray.com/packages/mini-stren/maven/multithemer/images/download.svg) ](https://bintray.com/mini-stren/maven/multithemer/_latestVersion)
+
 An Android Library that provides easy way to use as many app themes as you would like to
+
+## Gradle
+
+```groovy
+dependencies {
+    compile 'com.github.ministren:multithemer:1.2.0'
+}
+```
+
 
 # License
 ```
