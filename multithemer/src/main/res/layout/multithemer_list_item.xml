@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/multithemer_theme_card"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?attr/selectableItemBackgroundBorderless"
+    android:minHeight="@dimen/multithemer_theme_card_height"
+    app:cardPreventCornerOverlap="true"
+    app:cardUseCompatPadding="true"
+    app:contentPaddingLeft="@dimen/multithemer_theme_card_padding"
+    app:contentPaddingRight="@dimen/multithemer_theme_card_padding">
+
+    <ImageView
+        android:id="@+id/multithemer_theme_card_check_circle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        app:srcCompat="@drawable/multithemer_check_circle" />
+
+    <TextView
+        android:id="@+id/multithemer_theme_card_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="@android:color/white"
+        android:textSize="@dimen/multithemer_theme_card_text_size"
+        tools:text="Theme name" />
+
+</android.support.v7.widget.CardView>

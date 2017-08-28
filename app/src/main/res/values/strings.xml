@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MultiThemer Library DemoApp</string>
+    <string name="tab_text_1">Examples</string>
+    <string name="tab_text_2">MultiThemer List Fragment</string>
+</resources>

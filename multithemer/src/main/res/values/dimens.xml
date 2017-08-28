@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <dimen name="multithemer_recycler_view_horizontal_padding">16dp</dimen>
+    <dimen name="multithemer_recycler_view_vertical_padding">8dp</dimen>
+
+    <dimen name="multithemer_theme_card_height">72dp</dimen>
+    <dimen name="multithemer_theme_card_padding">8dp</dimen>
+    <dimen name="multithemer_theme_card_text_size">24sp</dimen>
+
+</resources>

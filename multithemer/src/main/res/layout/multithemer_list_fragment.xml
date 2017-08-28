@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.v7.widget.RecyclerView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:name="com.ministren.multithemer.MultiThemerListFragment"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipToPadding="false"
+    android:paddingBottom="@dimen/multithemer_recycler_view_vertical_padding"
+    android:paddingLeft="@dimen/multithemer_recycler_view_horizontal_padding"
+    android:paddingRight="@dimen/multithemer_recycler_view_horizontal_padding"
+    android:paddingTop="@dimen/multithemer_recycler_view_vertical_padding"
+    app:layoutManager="LinearLayoutManager"
+    tools:context="com.ministren.multithemer.MultiThemerListFragment"
+    tools:listitem="@layout/multithemer_list_item" />

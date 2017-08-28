@@ -1,0 +1,70 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+
+ext {
+    bintrayRepo = 'maven'
+    bintrayName = 'multithemer'
+
+    publishedGroupId = 'com.github.ministren'
+    libraryName = 'MultiThemer'
+    artifact = 'multithemer'
+
+    libraryDescription = 'An Android Library that provides easy way to use as many app themes as you would like to'
+
+    siteUrl = 'https://github.com/Mini-Stren/MultiThemer'
+    gitUrl = 'https://github.com/Mini-Stren/MultiThemer.git'
+    githubRepository = 'Mini-Stren/MultiThemer'
+
+    libraryVersion = '1.3.0'
+
+    developerId = 'mini-stren'
+    developerName = 'Dmitry Korjakin'
+    developerEmail = 'mesonministren@gmail.com'
+
+    licenseName = 'The Apache Software License, Version 2.0'
+    licenseUrl = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+    allLicenses = ["Apache-2.0"]
+}
+
+android {
+    compileSdkVersion sdk_version
+    buildToolsVersion buildTools_version
+
+    defaultConfig {
+        minSdkVersion 14
+        targetSdkVersion 26
+        versionCode 4
+        versionName "1.3.0"
+        vectorDrawables.useSupportLibrary = true
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+        }
+    }
+}
+
+tasks.withType(Javadoc) {
+    excludes = ['**/*.kt']
+}
+
+dependencies {
+    implementation fileTree(dir: 'libs', include: ['*.jar'])
+    //    Kotlin
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
+    //    Support
+    implementation 'com.android.support:appcompat-v7:26.0.1'
+    implementation 'com.android.support:cardview-v7:26.0.1'
+    implementation 'com.android.support:recyclerview-v7:26.0.1'
+}
+
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'kotlin-android-extensions'
+
+apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/installv1.gradle'
+apply from: 'https://raw.githubusercontent.com/nisrulz/JCenter/master/bintrayv1.gradle'
