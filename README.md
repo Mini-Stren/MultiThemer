@@ -8,7 +8,7 @@ An Android Library that provides easy way to use as many app themes as you would
 
 ```groovy
 dependencies {
-    compile 'com.github.ministren:multithemer:1.2.0'
+    compile 'com.github.ministren:multithemer:1.3.0'
 }
 ```
 
