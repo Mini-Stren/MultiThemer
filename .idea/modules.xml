@@ -3,11 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/MultiThemer.iml" filepath="$PROJECT_DIR$/MultiThemer.iml" />
-      <module fileurl="file://C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\MultiThemer.iml" filepath="C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\MultiThemer.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\app\app.iml" filepath="C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\app\app.iml" />
       <module fileurl="file://$PROJECT_DIR$/multithemer/multithemer.iml" filepath="$PROJECT_DIR$/multithemer/multithemer.iml" />
-      <module fileurl="file://C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\multithemer\multithemer.iml" filepath="C:\Users\minis\AndroidStudioProjects\3.0\MultiThemer\multithemer\multithemer.iml" />
     </modules>
   </component>
 </project>
