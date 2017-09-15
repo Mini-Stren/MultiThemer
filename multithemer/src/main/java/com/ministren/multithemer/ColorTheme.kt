@@ -28,11 +28,9 @@ import android.support.annotation.StyleRes
  * Created by Mini-Stren on 28.08.2017.
  */
 
-class ColorTheme(val context: Context, val tag: String, @StyleRes val styleResID: Int) {
+class ColorTheme(private val context: Context, val tag: String, @StyleRes val styleResID: Int) {
 
-    override fun toString(): String {
-        return "ColorTheme { tag='$tag', styleResID=$styleResID }"
-    }
+    override fun toString(): String = "ColorTheme { tag='$tag', styleResID='$styleResID' }"
 
     @ColorInt
     fun getAttrColor(@AttrRes attr: Int): Int {

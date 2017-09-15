@@ -1,5 +1,6 @@
 <resources>
-    <string name="app_name">MultiThemer Library DemoApp</string>
+    <string name="app_name">Demo MultiThemer Library</string>
     <string name="tab_text_1">Examples</string>
     <string name="tab_text_2">MultiThemer List Fragment</string>
+    <string name="menu_github">Open on GitHub</string>
 </resources>

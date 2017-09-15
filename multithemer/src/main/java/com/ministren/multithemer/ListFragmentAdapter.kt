@@ -34,7 +34,7 @@ import kotlinx.android.synthetic.main.multithemer_list_item.view.*
 
 class ListFragmentAdapter : RecyclerView.Adapter<ListFragmentAdapter.ViewHolder>() {
 
-    private val mThemesList = MultiThemer.instance.getThemesList()
+    private val mThemesList = MultiThemer.getThemesList()
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent?.context)
@@ -47,7 +47,7 @@ class ListFragmentAdapter : RecyclerView.Adapter<ListFragmentAdapter.ViewHolder>
         holder?.textView?.text = theme.tag
         holder?.cardView?.setCardBackgroundColor(theme.getColorPrimary())
 
-        val activeTheme = MultiThemer.instance.getActiveTheme()
+        val activeTheme = MultiThemer.getActiveTheme()
         holder?.checkCircle?.visibility = if (theme == activeTheme) View.VISIBLE else View.GONE
     }
 
@@ -59,7 +59,7 @@ class ListFragmentAdapter : RecyclerView.Adapter<ListFragmentAdapter.ViewHolder>
         val checkCircle: ImageView = view.multithemer_theme_card_check_circle
 
         init {
-            cardView.setOnClickListener { MultiThemer.instance.changeTheme(textView.text.toString()) }
+            cardView.setOnClickListener { MultiThemer.changeTheme(textView.text.toString()) }
         }
     }
 }

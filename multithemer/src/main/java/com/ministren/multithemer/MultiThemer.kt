@@ -81,7 +81,11 @@ import android.util.Log
  * Created by Mini-Stren on 28.08.2017.
  */
 
-class MultiThemer private constructor() {
+object MultiThemer {
+
+    internal val LOG_TAG = "MultiThemer"
+    internal val PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG"
+    private val PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE"
 
     private lateinit var mThemes: List<ColorTheme>
     private lateinit var mPrefs: SharedPreferences
@@ -89,30 +93,13 @@ class MultiThemer private constructor() {
     private var mAppIcon: Bitmap? = null
     private var mInitialized = false
 
-    private object Holder {
-        val INSTANCE = MultiThemer()
-    }
-
-    companion object {
-        internal val PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG"
-        internal val PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE"
-        internal val LOG_TAG = "MultiThemer"
-
-        val instance: MultiThemer by lazy {
-            if (BuildConfig.DEBUG) {
-                Log.d(LOG_TAG, "instance created")
-            }
-            Holder.INSTANCE
-        }
-
-        /**
-         * Creates a builder instance for this class to initialize library.
-         *
-         * @param application {@link Application} to attach to
-         * @return {@link Builder} to initialize the library with
-         */
-        fun build(application: Application) = Builder(application)
-    }
+    /**
+     * Creates a builder instance for this class to initialize library.
+     *
+     * @param application {@link Application} to attach to
+     * @return {@link Builder} to initialize the library with
+     */
+    fun build(application: Application) = Builder(application)
 
     /**
      * Sets active theme to specified activity.
@@ -122,9 +109,8 @@ class MultiThemer private constructor() {
      * @param activity {@link Activity} to set theme
      */
     fun applyThemeTo(activity: Activity) {
-        checkInit()
-
         val startTime = System.currentTimeMillis()
+        checkInit()
 
         val activeTheme = getActiveTheme()
         activity.setTheme(activeTheme!!.styleResID)
@@ -161,7 +147,7 @@ class MultiThemer private constructor() {
     fun getTheme(tag: String): ColorTheme? {
         checkInit()
         mThemes.filter { it.tag == tag }.first { return it }
-        Log.i(LOG_TAG, "theme with tag $tag not found")
+        Log.i(LOG_TAG, "theme with tag '$tag' not found")
         return null
     }
 
@@ -175,7 +161,7 @@ class MultiThemer private constructor() {
     fun getTheme(@StyleRes styleResID: Int): ColorTheme? {
         checkInit()
         mThemes.filter { it.styleResID == styleResID }.first { return it }
-        Log.i(LOG_TAG, "theme with style resource id $styleResID not found")
+        Log.i(LOG_TAG, "theme with style resource id '$styleResID' not found")
         return null
     }
 
@@ -192,7 +178,7 @@ class MultiThemer private constructor() {
      *
      * @return {@link String} saved theme tag
      */
-    fun getSavedThemeTag(): String = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
+    fun getSavedThemeTag(): String = getSharedPreferences().getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
 
     /**
      * Checks for active theme and changes it to specified theme if needed.
@@ -203,13 +189,11 @@ class MultiThemer private constructor() {
         checkInit()
 
         if (theme == null || !mThemes.contains(theme)) {
-            Log.w(LOG_TAG, "changing theme error")
+            Log.w(LOG_TAG, "can't change theme to $theme")
             return
         }
 
-        if (theme.tag == getSavedThemeTag()) {
-            return
-        }
+        if (theme.tag == getSavedThemeTag()) return
 
         Log.i(LOG_TAG, "changing theme to $theme")
 
@@ -239,12 +223,10 @@ class MultiThemer private constructor() {
     fun changeTheme(theme: THEME) = changeTheme(getTheme(theme.tag))
 
     private fun checkInit() {
-        if (!mInitialized) {
-            throw IllegalStateException("MultiThemer is not initialized!")
-        }
+        if (!mInitialized) throw IllegalStateException("MultiThemer is not initialized!")
     }
 
-    private fun containThemeWithTag(tag: String): Boolean = mThemes.any { it.tag == tag }
+    private fun containThemeWithTag(tag: String): Boolean = getThemesList().any { it.tag == tag }
 
     /**
      * Initializes MultiThemer with specified {@link Builder}.
@@ -252,16 +234,15 @@ class MultiThemer private constructor() {
      * @param builder {@link Builder} instance
      */
     private fun install(builder: Builder) {
-        if (builder.themes.isEmpty()) {
-            throw IllegalStateException("MultiThemer themes list is empty!")
-        }
+        if (builder.themes.isEmpty()) throw IllegalStateException("MultiThemer themes list is empty!")
 
         mPrefs = builder.prefs
         mThemes = builder.themes
         mAppIcon = builder.icon
 
-        val savedThemeTag = getSavedThemeTag()
-        if (savedThemeTag == PREFERENCE_NO_VALUE || !containThemeWithTag(savedThemeTag)) {
+        val savedThemeTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
+        val containThemeWithTag = mThemes.any { it.tag == savedThemeTag }
+        if (savedThemeTag == PREFERENCE_NO_VALUE || !containThemeWithTag) {
             Log.i(LOG_TAG, "theme with saved tag not found")
             Log.i(LOG_TAG, "saving tag '${builder.defaultTag}' as default")
             mActiveThemeTag = builder.defaultTag
@@ -306,9 +287,7 @@ class MultiThemer private constructor() {
 
         fun toColorTheme(context: Context) = ColorTheme(context, tag, styleResID)
 
-        override fun toString(): String {
-            return "THEME { tag='$tag', styleResID=$styleResID }"
-        }
+        override fun toString(): String = "THEME { tag='$tag', styleResID='$styleResID' }"
     }
 
     /**
@@ -319,11 +298,7 @@ class MultiThemer private constructor() {
         internal var themes: ArrayList<ColorTheme> = arrayListOf()
         internal var defaultTag: String = THEME.INDIGO.tag
         internal var icon: Bitmap? = null
-        internal var prefs: SharedPreferences
-
-        init {
-            prefs = PreferenceManager.getDefaultSharedPreferences(application.applicationContext)
-        }
+        internal var prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
 
         /**
          * Adds {@link ColorTheme} to themes list and sets it as default by {@code isDefault} flag.
@@ -352,9 +327,8 @@ class MultiThemer private constructor() {
          * @param isDefault flag to use theme as default
          * @return this {@link Builder}
          */
-        fun addTheme(theme: THEME, isDefault: Boolean = false): Builder {
-            return addTheme(theme.toColorTheme(application.applicationContext), isDefault)
-        }
+        fun addTheme(theme: THEME, isDefault: Boolean = false): Builder =
+                addTheme(theme.toColorTheme(application), isDefault)
 
         /**
          * Adds {@link ColorTheme} to themes list with specified tag and style resource id
@@ -365,10 +339,8 @@ class MultiThemer private constructor() {
          * @param isDefault       flag to use theme as default
          * @return this {@link Builder}
          */
-        fun addTheme(tag: String, @StyleRes styleResID: Int, isDefault: Boolean = false): Builder {
-            val theme = ColorTheme(application.applicationContext, tag, styleResID)
-            return addTheme(theme, isDefault)
-        }
+        fun addTheme(tag: String, @StyleRes styleResID: Int, isDefault: Boolean = false): Builder =
+                addTheme(ColorTheme(application, tag, styleResID), isDefault)
 
         /**
          * Sets specified {@link THEME} to use as default theme.
@@ -424,11 +396,12 @@ class MultiThemer private constructor() {
             if (themes.isEmpty()) {
                 Log.i(LOG_TAG, "no themes was added, initializing with default themes list")
                 THEME.values().forEach { addTheme(it) }
-                if (themes.none { it.tag == defaultTag }) {
-                    defaultTag = themes.first().tag
-                }
             }
-            MultiThemer.instance.install(this)
+            if (themes.none { it.tag == defaultTag }) {
+                Log.i(LOG_TAG, "theme with default tag not found in themes list, setting first theme as default")
+                defaultTag = themes.first().tag
+            }
+            MultiThemer.install(this)
         }
 
         private fun checkForDuplicates(theme: ColorTheme) {

@@ -37,34 +37,30 @@ open class MultiThemeActivity : AppCompatActivity(), SharedPreferences.OnSharedP
     private lateinit var mThemeTag: String
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        MultiThemer.instance.applyThemeTo(this)
-        mThemeTag = MultiThemer.instance.getSavedThemeTag()
+        MultiThemer.applyThemeTo(this)
+        mThemeTag = MultiThemer.getSavedThemeTag()
         super.onCreate(savedInstanceState)
     }
 
     override fun onPause() {
         super.onPause()
-        MultiThemer.instance.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
+        MultiThemer.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 
     override fun onResume() {
         super.onResume()
-        MultiThemer.instance.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
-        val tag = MultiThemer.instance.getSavedThemeTag()
-        if (mThemeTag != tag) {
-            restartActivity()
-        }
+        MultiThemer.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
+        val tag = MultiThemer.getSavedThemeTag()
+        if (mThemeTag != tag) restartActivity()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
-        if (key == MultiThemer.PREFERENCE_KEY) {
-            restartActivity()
-        }
+        if (key == MultiThemer.PREFERENCE_KEY) restartActivity()
     }
 
     private fun restartActivity() {
         if (BuildConfig.DEBUG) {
-            Log.d(MultiThemer.LOG_TAG, "restarting activity $this")
+            Log.d(MultiThemer.LOG_TAG, "restarting activity '$this'")
         }
         recreate()
     }

@@ -3,13 +3,13 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion sdk_version
+    compileSdkVersion sdkCompile_version
     buildToolsVersion buildTools_version
 
     defaultConfig {
         applicationId "com.ministren.demoapp.multithemer"
-        minSdkVersion 14
-        targetSdkVersion 26
+        minSdkVersion sdkMin_version
+        targetSdkVersion sdkTarget_version
         versionCode 1
         versionName "1.0"
         vectorDrawables.useSupportLibrary = true
@@ -28,8 +28,8 @@ dependencies {
     //    Kotlin
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jre7:$kotlin_version"
     //    Support
-    implementation 'com.android.support:appcompat-v7:26.0.1'
-    implementation 'com.android.support:design:26.0.1'
+    implementation "com.android.support:appcompat-v7:$support_version"
+    implementation "com.android.support:design:$support_version"
     implementation 'com.android.support.constraint:constraint-layout:1.0.2'
     //    MultiThemer
     implementation project(':multithemer')
