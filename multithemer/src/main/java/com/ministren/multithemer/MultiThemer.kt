@@ -307,6 +307,7 @@ object MultiThemer {
          * @param isDefault flag to use theme as default
          * @return this {@link Builder}
          */
+        @JvmOverloads
         fun addTheme(theme: ColorTheme, isDefault: Boolean = false): Builder {
             checkForDuplicates(theme)
             if (isDefault) {
@@ -327,6 +328,7 @@ object MultiThemer {
          * @param isDefault flag to use theme as default
          * @return this {@link Builder}
          */
+        @JvmOverloads
         fun addTheme(theme: THEME, isDefault: Boolean = false): Builder =
                 addTheme(theme.toColorTheme(application), isDefault)
 
@@ -339,6 +341,7 @@ object MultiThemer {
          * @param isDefault       flag to use theme as default
          * @return this {@link Builder}
          */
+        @JvmOverloads
         fun addTheme(tag: String, @StyleRes styleResID: Int, isDefault: Boolean = false): Builder =
                 addTheme(ColorTheme(application, tag, styleResID), isDefault)
 
