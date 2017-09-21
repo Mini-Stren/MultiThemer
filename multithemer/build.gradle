@@ -15,7 +15,7 @@ ext {
     gitUrl = 'https://github.com/Mini-Stren/MultiThemer.git'
     githubRepository = 'Mini-Stren/MultiThemer'
 
-    libraryVersion = '1.4.0'
+    libraryVersion = '1.4.1'
 
     developerId = 'mini-stren'
     developerName = 'Dmitry Korjakin'
@@ -33,8 +33,8 @@ android {
     defaultConfig {
         minSdkVersion sdkMin_version
         targetSdkVersion sdkTarget_version
-        versionCode 5
-        versionName "1.4.0"
+        versionCode 6
+        versionName "1.4.1"
         vectorDrawables.useSupportLibrary = true
     }
 
