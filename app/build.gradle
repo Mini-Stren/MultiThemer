@@ -10,8 +10,8 @@ android {
         applicationId "com.ministren.demoapp.multithemer"
         minSdkVersion sdkMin_version
         targetSdkVersion sdkTarget_version
-        versionCode 2
-        versionName "1.1"
+        versionCode 3
+        versionName "1.2"
         vectorDrawables.useSupportLibrary = true
     }
 

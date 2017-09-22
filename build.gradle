@@ -4,7 +4,7 @@ buildscript {
     ext.sdkTarget_version = 26
     ext.sdkCompile_version = 26
     ext.buildTools_version = '26.0.1'
-    ext.support_version = '26.0.2'
+    ext.support_version = '26.1.0'
 
     repositories {
         google()
