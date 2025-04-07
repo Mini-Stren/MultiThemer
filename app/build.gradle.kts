@@ -1,3 +1,5 @@
+import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
@@ -19,6 +21,15 @@ android {
         viewBinding = true
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore.jks")
+            storePassword = getValueFromEnvOrLocalProperties("SIGNING_STORE_PASSWORD")
+            keyAlias = getValueFromEnvOrLocalProperties("SIGNING_KEY_ALIAS")
+            keyPassword = getValueFromEnvOrLocalProperties("SIGNING_KEY_PASSWORD")
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = true
@@ -27,6 +38,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            signingConfig = signingConfigs.getByName("release")
         }
     }
 
@@ -49,4 +61,12 @@ dependencies {
     implementation(libs.androidx.viewpager2)
     implementation(libs.material)
     implementation(libs.androidbroadcast.vbpd)
+}
+
+private fun getValueFromEnvOrLocalProperties(
+    envKeyName: String,
+    localPropertiesKeyName: String = envKeyName,
+): String? {
+    return System.getenv(envKeyName)
+        ?: gradleLocalProperties(rootDir, providers).getProperty(localPropertiesKeyName)
 }

@@ -1,0 +1,57 @@
+name: Build project
+
+on:
+  push:
+    branches: [ "master" ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+      - name: set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+          cache: gradle
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
+
+      - name: Check build
+        run: ./gradlew check
+
+      - name: Decode Keystore
+        uses: timheuer/base64-to-file@v1
+        with:
+          fileName: 'app/keystore.jks'
+          encodedString: ${{ secrets.KEYSTORE }}
+
+      - name: Build project
+        run: ./gradlew :multithemer:assembleRelease :app:assembleRelease
+
+      - name: Upload library build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: library
+          path: multithemer/build/outputs/aar/multithemer-release.aar
+
+      - name: Upload demo app build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: demo-app
+          path: app/build/outputs/apk/release/app-release.apk
+
+      - name: Save Gradle cache
+        uses: actions/cache@v4
+        continue-on-error: true
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
