@@ -19,44 +19,48 @@
 
 package com.ministren.multithemer
 
-import android.support.v7.widget.CardView
-import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
-import kotlinx.android.synthetic.main.multithemer_list_item.view.*
+import androidx.cardview.widget.CardView
+import androidx.recyclerview.widget.RecyclerView
 
 /**
  * Created by Mini-Stren on 28.08.2017.
  */
+public class ListFragmentAdapter : RecyclerView.Adapter<ListFragmentAdapter.ViewHolder>() {
 
-class ListFragmentAdapter : RecyclerView.Adapter<ListFragmentAdapter.ViewHolder>() {
+    private val themesList = MultiThemer.getThemesList()
 
-    private val mThemesList = MultiThemer.getThemesList()
-
-    override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): ViewHolder {
-        val view = LayoutInflater.from(parent?.context)
-                .inflate(R.layout.multithemer_list_item, parent, false)
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+        val view = LayoutInflater.from(parent.context)
+            .inflate(R.layout.multithemer_list_item, parent, false)
         return ViewHolder(view)
     }
 
-    override fun onBindViewHolder(holder: ViewHolder?, position: Int) {
-        val theme = mThemesList[position]
-        holder?.textView?.text = theme.tag
-        holder?.cardView?.setCardBackgroundColor(theme.getColorPrimary())
+    override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val theme = themesList[position]
+        holder.textView.text = theme.tag
+        holder.cardView.setCardBackgroundColor(theme.getColorPrimary())
 
         val activeTheme = MultiThemer.getActiveTheme()
-        holder?.checkCircle?.visibility = if (theme == activeTheme) View.VISIBLE else View.GONE
+        holder.checkCircle.visibility = if (theme == activeTheme) View.VISIBLE else View.GONE
     }
 
-    override fun getItemCount(): Int = mThemesList.size
+    override fun getItemCount(): Int = themesList.size
 
-    inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
-        val cardView: CardView = view.multithemer_theme_card
-        val textView: TextView = view.multithemer_theme_card_text
-        val checkCircle: ImageView = view.multithemer_theme_card_check_circle
+    public inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+
+        public val cardView: CardView =
+            view.findViewById(R.id.multithemer_theme_card)
+
+        public val textView: TextView =
+            view.findViewById(R.id.multithemer_theme_card_text)
+
+        public val checkCircle: ImageView =
+            view.findViewById(R.id.multithemer_theme_card_check_circle)
 
         init {
             cardView.setOnClickListener { MultiThemer.changeTheme(textView.text.toString()) }

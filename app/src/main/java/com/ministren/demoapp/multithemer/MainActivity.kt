@@ -1,31 +1,60 @@
 package com.ministren.demoapp.multithemer
 
 import android.content.Intent
-import android.net.Uri
-import android.support.design.widget.TabLayout
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentManager
-import android.support.v4.app.FragmentPagerAdapter
 import android.os.Bundle
-import android.view.*
+import android.view.Menu
+import android.view.MenuItem
+import androidx.activity.enableEdgeToEdge
+import androidx.core.net.toUri
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.updatePaddingRelative
+import androidx.fragment.app.Fragment
+import androidx.viewpager2.adapter.FragmentStateAdapter
+import com.google.android.material.tabs.TabLayoutMediator
+import com.ministren.demoapp.multithemer.databinding.ActivityMainBinding
 import com.ministren.multithemer.MultiThemeActivity
 import com.ministren.multithemer.MultiThemerListFragment
-import kotlinx.android.synthetic.main.activity_main.*
+import dev.androidbroadcast.vbpd.viewBinding
 
-class MainActivity : MultiThemeActivity() {
+class MainActivity : MultiThemeActivity(R.layout.activity_main) {
 
-    private var mSectionsPagerAdapter: SectionsPagerAdapter? = null
+    private val viewBinding by viewBinding(ActivityMainBinding::bind)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        setSupportActionBar(toolbar)
+        setSupportActionBar(viewBinding.toolbar)
 
-        mSectionsPagerAdapter = SectionsPagerAdapter(supportFragmentManager)
+        with(viewBinding) {
+            container.adapter = SectionsPagerAdapter()
+            TabLayoutMediator(tabs, container) { tab, position ->
+                tab.setText(
+                    when (position) {
+                        0 -> R.string.tab_text_1
+                        1 -> R.string.tab_text_2
+                        else -> throw IllegalStateException()
+                    }
+                )
+            }.attach()
+        }
 
-        container.adapter = mSectionsPagerAdapter
-        container.addOnPageChangeListener(TabLayout.TabLayoutOnPageChangeListener(tabs))
-        tabs.addOnTabSelectedListener(TabLayout.ViewPagerOnTabSelectedListener(container))
+        ViewCompat.setOnApplyWindowInsetsListener(viewBinding.root) { _, insets ->
+            val systemInsets = insets.getInsets(
+                WindowInsetsCompat.Type.systemBars() or WindowInsetsCompat.Type.displayCutout()
+            )
+            viewBinding.appbar.updatePaddingRelative(
+                top = systemInsets.top,
+                start = systemInsets.left,
+                end = systemInsets.right,
+            )
+            viewBinding.container.updatePaddingRelative(
+                bottom = systemInsets.bottom,
+                start = systemInsets.left,
+                end = systemInsets.right,
+            )
+            WindowInsetsCompat.CONSUMED
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -39,32 +68,25 @@ class MainActivity : MultiThemeActivity() {
                 val intent = Intent()
                 intent.action = "android.intent.action.VIEW"
                 intent.addCategory("android.intent.category.BROWSABLE")
-                intent.data = Uri.parse("https://github.com/Mini-Stren/MultiThemer")
+                intent.data = "https://github.com/Mini-Stren/MultiThemer".toUri()
                 startActivity(intent)
                 true
             }
+
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    inner class SectionsPagerAdapter(fm: FragmentManager) : FragmentPagerAdapter(fm) {
+    inner class SectionsPagerAdapter : FragmentStateAdapter(this) {
 
-        private var mFragmentsList = arrayListOf(ExamplesFragment(), MultiThemerListFragment())
+        override fun getItemCount(): Int = 2
 
-        override fun getItem(position: Int): Fragment {
-            return mFragmentsList[position]
-        }
-
-        override fun getCount(): Int {
-            return mFragmentsList.size
+        override fun createFragment(position: Int): Fragment = when (position) {
+            0 -> ExamplesFragment()
+            1 -> MultiThemerListFragment()
+            else -> throw IllegalStateException()
         }
     }
 
-    class ExamplesFragment : Fragment() {
-
-        override fun onCreateView(inflater: LayoutInflater?, container: ViewGroup?,
-                                  savedInstanceState: Bundle?): View? {
-            return inflater?.inflate(R.layout.fragment_examples, container, false)
-        }
-    }
+    class ExamplesFragment : Fragment(R.layout.fragment_examples)
 }

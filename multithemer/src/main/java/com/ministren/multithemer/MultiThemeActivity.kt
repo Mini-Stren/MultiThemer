@@ -21,24 +21,30 @@ package com.ministren.multithemer
 
 import android.content.SharedPreferences
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import androidx.annotation.ContentView
+import androidx.annotation.LayoutRes
+import androidx.appcompat.app.AppCompatActivity
 
 /**
- * * Activity use {@link MultiThemer} to automatically
- * apply app's active theme and restart itself after theme change
- * <p>
+ * This activity uses [MultiThemer] to automatically
+ * apply application active theme and restart itself after theme change
  *
  * Created by Mini-Stren on 28.08.2017.
  */
+public open class MultiThemeActivity : AppCompatActivity,
+    SharedPreferences.OnSharedPreferenceChangeListener {
 
-open class MultiThemeActivity : AppCompatActivity(), SharedPreferences.OnSharedPreferenceChangeListener {
+    private lateinit var activeThemeTag: String
 
-    private lateinit var mThemeTag: String
+    public constructor() : super()
+
+    @ContentView
+    public constructor(@LayoutRes contentLayoutId: Int) : super(contentLayoutId)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         MultiThemer.applyThemeTo(this)
-        mThemeTag = MultiThemer.getSavedThemeTag()
+        activeThemeTag = MultiThemer.getSavedThemeTag()
         super.onCreate(savedInstanceState)
     }
 
@@ -51,7 +57,7 @@ open class MultiThemeActivity : AppCompatActivity(), SharedPreferences.OnSharedP
         super.onResume()
         MultiThemer.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
         val tag = MultiThemer.getSavedThemeTag()
-        if (mThemeTag != tag) restartActivity()
+        if (activeThemeTag != tag) restartActivity()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {

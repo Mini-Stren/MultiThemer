@@ -20,20 +20,24 @@
 package com.ministren.multithemer
 
 import android.content.Context
-import android.support.annotation.AttrRes
-import android.support.annotation.ColorInt
-import android.support.annotation.StyleRes
+import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
+import androidx.annotation.StyleRes
+import com.google.android.material.R as MaterialR
 
 /**
  * Created by Mini-Stren on 28.08.2017.
  */
+public class ColorTheme(
+    private val context: Context,
+    public val tag: String,
+    @StyleRes public val styleResID: Int,
+) {
 
-class ColorTheme(private val context: Context, val tag: String, @StyleRes val styleResID: Int) {
-
-    override fun toString(): String = "ColorTheme { tag='$tag', styleResID='$styleResID' }"
+    public override fun toString(): String = "ColorTheme { tag='$tag', styleResID='$styleResID' }"
 
     @ColorInt
-    fun getAttrColor(@AttrRes attr: Int): Int {
+    public fun getAttrColor(@AttrRes attr: Int): Int {
         val typedArray = context.obtainStyledAttributes(styleResID, intArrayOf(attr))
         val color = typedArray.getColor(0, 0)
         typedArray.recycle()
@@ -41,11 +45,11 @@ class ColorTheme(private val context: Context, val tag: String, @StyleRes val st
     }
 
     @ColorInt
-    fun getColorPrimary() = getAttrColor(R.attr.colorPrimary)
+    public fun getColorPrimary(): Int = getAttrColor(MaterialR.attr.colorPrimary)
 
     @ColorInt
-    fun getColorPrimaryDark() = getAttrColor(R.attr.colorPrimaryDark)
+    public fun getColorPrimaryDark(): Int = getAttrColor(MaterialR.attr.colorPrimaryDark)
 
     @ColorInt
-    fun getColorAccent() = getAttrColor(R.attr.colorAccent)
+    public fun getColorSecondary(): Int = getAttrColor(MaterialR.attr.colorSecondary)
 }

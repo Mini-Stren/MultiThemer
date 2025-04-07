@@ -24,100 +24,109 @@ import android.app.ActivityManager
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Build
-import android.preference.PreferenceManager
-import android.support.annotation.DrawableRes
-import android.support.annotation.StyleRes
 import android.util.Log
+import androidx.annotation.DrawableRes
+import androidx.annotation.StyleRes
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
+import com.ministren.multithemer.MultiThemer.Builder
+import com.ministren.multithemer.MultiThemer.THEME
+import com.ministren.multithemer.MultiThemer.build
+import com.ministren.multithemer.MultiThemer.getActiveTheme
+import com.ministren.multithemer.MultiThemer.getThemesList
+import com.google.android.material.R as MaterialR
 
 /**
- * {@link MultiThemer} provides easy way to use as many app themes as you would like.
- * {@link MultiThemer} will save last used app's theme and restore it in app launch.
- * <p>
+ * Provides easy way to use as many app themes as you would like.
+ * Will save last used application theme and restore it in app launch.
+ *
  * All you need to do is:
- * <p>
- * 1. Extend activity from {@link MultiThemeActivity} to let it
- * automatically apply app's active theme and restart after theme change.
- * <p>
- * 2. Define your themes in {@code styles.xml}, or use up to 20 predefined themes in {@link THEME}.
- * <p>
- * 3. Initialize {@link MultiThemer} in your {@link Application} class using method {@link #build(Application)}.
- * <p>
- * 3.1. {@link #build(Application)} will return {@link Builder},
- * which you can use to add themes, set icon to use in recent apps list,
- * set SharedPreferences that will be used to save theme tag after theme change
- * and set by default one of {@link THEME} themes.
- * <p>
- * 3.2. If you will not use any of {@link Builder}{@code .addTheme()} methods,
- * it will automatically fill themes list with all predefined {@link THEME} themes.
- * It will use {@link THEME#INDIGO} as default theme,
- * or you can change it with {@link Builder#setDefault(THEME)}.
- * <p>
- * 3.3. While adding your own themes using one of {@link Builder}{@code .addTheme()} methods,
- * don't forget to use for at least one {@code .addTheme()} method with parameter {@code isDefault},
- * otherwise the first theme in the list will be used by default one.
- * <p>
- * 3.4. {@link Builder#setSharedPreferences(SharedPreferences)} is optional.
- * {@code DefaultSharedPreferences} will be used by default.
- * <p>
- * You can use {@link MultiThemerListFragment} to present all app's themes
+ *
+ * 1. Extend activity from [MultiThemeActivity] to let it
+ * automatically apply application active theme and restart after theme change.
+ *
+ * 2. Define your themes in application resources, or use up to 20 predefined themes in [THEME].
+ *
+ * 3. Initialize [MultiThemer] in your [Application] class using method [build].
+ *    1. [build] will return [Builder],
+ *  which you can use to add themes, set icon to use in recent apps list,
+ *  set SharedPreferences that will be used to save theme tag after theme change
+ *  and set by default one of [THEME] themes.
+ *    2. If you will not use any of [Builder.addTheme] methods,
+ *  it will automatically fill themes list with all predefined [THEME] themes.
+ *  It will use [THEME.INDIGO] as default theme,
+ *  or you can change it with [Builder.setDefault].
+ *    3. While adding your own themes using one of [Builder.addTheme] methods,
+ *  don't forget to set `isDefault = true` for at least one of them,
+ *  otherwise the first theme in the list will be used by default one.
+ *    4. [Builder.setSharedPreferences] is optional.
+ *  [PreferenceManager.getDefaultSharedPreferences] will be used by default.
+ *
+ * You can use [MultiThemerListFragment] to present all application themes
  * and give users easy way to switch between themes,
- * or use {@link #getThemesList()} and {@link #getActiveTheme()} to write your own theme chooser.
- * <p>
- * See also:
- * <p>
- * {@link Builder#useAppIcon(int)} and {@link Builder#useAppIcon(Bitmap)}
- * <p>
- * {@link THEME} and {@link ColorTheme}
- * <p>
- * {@link MultiThemeActivity}
- * <p>
- * <p>
- * Look at {@code https://github.com/Mini-Stren/MultiThemer} for more info, screenshots and demo app.
- * <p>
+ * or use [getThemesList] and [getActiveTheme] to write your own theme chooser.
+ *
+ * Look at [GitHub repository](https://github.com/Mini-Stren/MultiThemer) for more info, screenshots and demo app.
+ *
+ * @see Builder.useAppIcon
+ * @see THEME
+ * @see ColorTheme
+ * @see MultiThemeActivity
  *
  * Created by Mini-Stren on 28.08.2017.
  */
+public object MultiThemer {
 
-object MultiThemer {
+    internal const val LOG_TAG = "MultiThemer"
+    internal const val PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG"
+    private const val PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE"
 
-    internal val LOG_TAG = "MultiThemer"
-    internal val PREFERENCE_KEY = "com.ministren.multithemer.SAVED_TAG"
-    private val PREFERENCE_NO_VALUE = "com.ministren.multithemer.NO_SAVED_TAG_VALUE"
+    private lateinit var themesList: List<ColorTheme>
+    private lateinit var sharedPreferences: SharedPreferences
+    private lateinit var activeThemeTag: String
 
-    private lateinit var mThemes: List<ColorTheme>
-    private lateinit var mPrefs: SharedPreferences
-    private lateinit var mActiveThemeTag: String
-    private var mAppIcon: Bitmap? = null
-    private var mInitialized = false
+    @DrawableRes
+    private var appIconResId: Int? = null
+    private var initialized = false
 
     /**
      * Creates a builder instance for this class to initialize library.
      *
-     * @param application {@link Application} to attach to
-     * @return {@link Builder} to initialize the library with
+     * @param application [Application] to attach to
+     * @return [Builder] to initialize the library with
      */
-    fun build(application: Application) = Builder(application)
+    public fun build(application: Application): Builder = Builder(application)
 
     /**
      * Sets active theme to specified activity.
-     * <p>
-     * {@link MultiThemeActivity} calls this method in {@link MultiThemeActivity#onCreate(Bundle)}
      *
-     * @param activity {@link Activity} to set theme
+     * [MultiThemeActivity] calls this method in [MultiThemeActivity.onCreate]
+     *
+     * @param activity [Activity] to set theme
      */
-    fun applyThemeTo(activity: Activity) {
+    public fun applyThemeTo(activity: Activity) {
         val startTime = System.currentTimeMillis()
         checkInit()
 
         val activeTheme = getActiveTheme()
         activity.setTheme(activeTheme!!.styleResID)
 
-        if (Build.VERSION.SDK_INT >= 21 && mAppIcon != null) {
-            val taskDescription = ActivityManager.TaskDescription(
-                    null, mAppIcon, activeTheme.getAttrColor(R.attr.colorPrimary))
+        if (appIconResId != null) {
+            val primaryColor = activeTheme.getAttrColor(MaterialR.attr.colorPrimary)
+            val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                ActivityManager.TaskDescription.Builder().apply {
+                    appIconResId?.let(::setIcon)
+                    setPrimaryColor(primaryColor)
+                }.build()
+            } else {
+                val appIcon = appIconResId?.let {
+                    BitmapFactory.decodeResource(activity.resources, it)
+                }
+                @Suppress("DEPRECATION")
+                ActivityManager.TaskDescription(null, appIcon, primaryColor)
+            }
             activity.setTaskDescription(taskDescription)
         }
 
@@ -127,28 +136,28 @@ object MultiThemer {
         }
     }
 
-    fun getThemesList(): List<ColorTheme> {
+    public fun getThemesList(): List<ColorTheme> {
         checkInit()
-        return mThemes
+        return themesList
     }
 
-    fun getSharedPreferences(): SharedPreferences {
+    public fun getSharedPreferences(): SharedPreferences {
         checkInit()
-        return mPrefs
+        return sharedPreferences
     }
 
     /**
      * Looks for theme with specified tag in themes list.
      * Returns theme if founded, or null.
      *
-     * @param tag {@link String} theme tag to find
-     * @return {@link ColorTheme} or null
+     * @param tag theme tag to find
+     * @return [ColorTheme] or null
      */
-    fun getTheme(tag: String): ColorTheme? {
+    public fun getTheme(tag: String): ColorTheme? {
         checkInit()
-        mThemes.filter { it.tag == tag }.first { return it }
-        Log.i(LOG_TAG, "theme with tag '$tag' not found")
-        return null
+        return themesList.firstOrNull { it.tag == tag } ?: null.also {
+            Log.i(LOG_TAG, "theme with tag '$tag' not found")
+        }
     }
 
     /**
@@ -156,39 +165,43 @@ object MultiThemer {
      * Returns theme if founded, or null.
      *
      * @param styleResID style resource id to find
-     * @return {@link ColorTheme} or null
+     * @return [ColorTheme] or null
      */
-    fun getTheme(@StyleRes styleResID: Int): ColorTheme? {
+    public fun getTheme(@StyleRes styleResID: Int): ColorTheme? {
         checkInit()
-        mThemes.filter { it.styleResID == styleResID }.first { return it }
-        Log.i(LOG_TAG, "theme with style resource id '$styleResID' not found")
-        return null
+        return themesList.firstOrNull { it.styleResID == styleResID } ?: null.also {
+            Log.i(LOG_TAG, "theme with style resource id '$styleResID' not found")
+        }
     }
 
     /**
      * Looks for theme with active theme tag in themes list.
      * Returns theme if founded, or null.
      *
-     * @return {@link ColorTheme} or null
+     * @return [ColorTheme] or null
      */
-    fun getActiveTheme(): ColorTheme? = getTheme(mActiveThemeTag)
+    public fun getActiveTheme(): ColorTheme? {
+        checkInit()
+        return getTheme(activeThemeTag)
+    }
 
     /**
      * Returns saved after last theme change theme tag.
      *
-     * @return {@link String} saved theme tag
+     * @return saved theme tag
      */
-    fun getSavedThemeTag(): String = getSharedPreferences().getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
+    public fun getSavedThemeTag(): String =
+        getSharedPreferences().getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE) ?: PREFERENCE_NO_VALUE
 
     /**
      * Checks for active theme and changes it to specified theme if needed.
      *
-     * @param theme {@link ColorTheme} to set as active
+     * @param theme [ColorTheme] to set as active
      */
-    fun changeTheme(theme: ColorTheme?) {
+    public fun changeTheme(theme: ColorTheme?) {
         checkInit()
 
-        if (theme == null || !mThemes.contains(theme)) {
+        if (theme == null || !themesList.contains(theme)) {
             Log.w(LOG_TAG, "can't change theme to $theme")
             return
         }
@@ -197,73 +210,86 @@ object MultiThemer {
 
         Log.i(LOG_TAG, "changing theme to $theme")
 
-        mActiveThemeTag = theme.tag
-        mPrefs.edit().putString(PREFERENCE_KEY, mActiveThemeTag).apply()
+        activeThemeTag = theme.tag
+        sharedPreferences.edit { putString(PREFERENCE_KEY, activeThemeTag) }
     }
 
     /**
      * Checks for active theme and changes it to theme with specified tag if needed.
      *
-     * @param tag {@link String} theme tag
+     * @param tag theme tag
      */
-    fun changeTheme(tag: String) = changeTheme(getTheme(tag))
+    public fun changeTheme(tag: String) {
+        changeTheme(getTheme(tag))
+    }
 
     /**
      * Checks for active theme and changes it to theme with specified style resource id if needed.
      *
      * @param styleResID theme style resource id
      */
-    fun changeTheme(@StyleRes styleResID: Int) = changeTheme(getTheme(styleResID))
+    public fun changeTheme(@StyleRes styleResID: Int) {
+        changeTheme(getTheme(styleResID))
+    }
 
     /**
      * Checks for active theme and changes it to specified theme if needed.
      *
-     * @param theme {@link THEME} to set as active
+     * @param theme [THEME] to set as active
      */
-    fun changeTheme(theme: THEME) = changeTheme(getTheme(theme.tag))
-
-    private fun checkInit() {
-        if (!mInitialized) throw IllegalStateException("MultiThemer is not initialized!")
+    public fun changeTheme(theme: THEME) {
+        changeTheme(getTheme(theme.tag))
     }
 
-    private fun containThemeWithTag(tag: String): Boolean = getThemesList().any { it.tag == tag }
+    private fun checkInit() {
+        if (!initialized) error("MultiThemer is not initialized!")
+    }
 
     /**
-     * Initializes MultiThemer with specified {@link Builder}.
+     * Initializes MultiThemer with specified [Builder].
      *
-     * @param builder {@link Builder} instance
+     * @param builder [Builder] instance
      */
     private fun install(builder: Builder) {
-        if (builder.themes.isEmpty()) throw IllegalStateException("MultiThemer themes list is empty!")
-
-        mPrefs = builder.prefs
-        mThemes = builder.themes
-        mAppIcon = builder.icon
-
-        val savedThemeTag = mPrefs.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
-        val containThemeWithTag = mThemes.any { it.tag == savedThemeTag }
-        if (savedThemeTag == PREFERENCE_NO_VALUE || !containThemeWithTag) {
-            Log.i(LOG_TAG, "theme with saved tag not found")
-            Log.i(LOG_TAG, "saving tag '${builder.defaultTag}' as default")
-            mActiveThemeTag = builder.defaultTag
-            mPrefs.edit().putString(PREFERENCE_KEY, builder.defaultTag).apply()
-        } else {
-            Log.i(LOG_TAG, "restoring theme with saved tag '$savedThemeTag'")
-            mActiveThemeTag = savedThemeTag
+        if (builder.themesList.isEmpty()) {
+            error("MultiThemer themes list is empty!")
         }
 
-        mInitialized = true
+        sharedPreferences = builder.sharedPreferences
+        themesList = builder.themesList
+        appIconResId = builder.appIconResId
+
+        val savedThemeTag = sharedPreferences.getString(PREFERENCE_KEY, PREFERENCE_NO_VALUE)
+            ?: PREFERENCE_NO_VALUE
+        val containThemeWithTag = themesList.any { it.tag == savedThemeTag }
+        if (savedThemeTag == PREFERENCE_NO_VALUE || !containThemeWithTag) {
+            Log.i(LOG_TAG, "theme with saved tag not found")
+            Log.i(LOG_TAG, "saving tag '${builder.defaultThemeTag}' as default")
+            activeThemeTag = builder.defaultThemeTag
+            sharedPreferences.edit { putString(PREFERENCE_KEY, builder.defaultThemeTag) }
+        } else {
+            Log.i(LOG_TAG, "restoring theme with saved tag '$savedThemeTag'")
+            activeThemeTag = savedThemeTag
+        }
+
+        initialized = true
 
         if (BuildConfig.DEBUG) {
-            val time = System.currentTimeMillis() - builder.startTime
-            Log.d(LOG_TAG, "MultiThemer initialized in $time milliseconds to ${builder.application.packageName}")
+            val time = System.currentTimeMillis() - builder.initStartTime
+            Log.d(
+                LOG_TAG,
+                "MultiThemer initialized in $time milliseconds to ${builder.application.packageName}"
+            )
         }
     }
 
     /**
      * Enumeration of predefined by library themes
      */
-    enum class THEME(val tag: String, @StyleRes val styleResID: Int) {
+    public enum class THEME(
+        public val tag: String,
+        @StyleRes public val styleResID: Int,
+    ) {
         RED("Red", R.style.MultiThemer_Red),
         PINK("Pink", R.style.MultiThemer_Pink),
         PURPLE("Purple", R.style.MultiThemer_Purple),
@@ -285,7 +311,7 @@ object MultiThemer {
         BLUE_GREY("Blue Grey", R.style.MultiThemer_BlueGrey),
         BLACK("Black", R.style.MultiThemer_Black);
 
-        fun toColorTheme(context: Context) = ColorTheme(context, tag, styleResID)
+        public fun toColorTheme(context: Context): ColorTheme = ColorTheme(context, tag, styleResID)
 
         override fun toString(): String = "THEME { tag='$tag', styleResID='$styleResID' }"
     }
@@ -293,27 +319,33 @@ object MultiThemer {
     /**
      * Initialization builder
      */
-    class Builder(internal var application: Application) {
-        internal var startTime: Long = System.currentTimeMillis()
-        internal var themes: ArrayList<ColorTheme> = arrayListOf()
-        internal var defaultTag: String = THEME.INDIGO.tag
-        internal var icon: Bitmap? = null
-        internal var prefs: SharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
+    public class Builder(internal val application: Application) {
+        internal val initStartTime: Long = System.currentTimeMillis()
+
+        internal val themesList = mutableListOf<ColorTheme>()
+        internal var defaultThemeTag: String = THEME.INDIGO.tag
+
+        @DrawableRes
+        internal var appIconResId: Int? = null
+        internal var sharedPreferences = PreferenceManager.getDefaultSharedPreferences(application)
 
         /**
-         * Adds {@link ColorTheme} to themes list and sets it as default by {@code isDefault} flag.
+         * Adds [ColorTheme] to themes list and sets it as default by [isDefault] flag.
          *
-         * @param theme     {@link ColorTheme} to add
+         * @param theme [ColorTheme] to add
          * @param isDefault flag to use theme as default
-         * @return this {@link Builder}
+         * @return this [Builder]
          */
         @JvmOverloads
-        fun addTheme(theme: ColorTheme, isDefault: Boolean = false): Builder {
+        public fun addTheme(
+            theme: ColorTheme,
+            isDefault: Boolean = false,
+        ): Builder {
             checkForDuplicates(theme)
             if (isDefault) {
-                defaultTag = theme.tag
+                defaultThemeTag = theme.tag
             }
-            themes.add(theme)
+            themesList.add(theme)
 
             if (BuildConfig.DEBUG) {
                 Log.d(LOG_TAG, "theme $theme added to list")
@@ -322,97 +354,92 @@ object MultiThemer {
         }
 
         /**
-         * Adds {@link THEME} to themes list and sets it as default by {@code isDefault} flag.
+         * Adds [THEME] to themes list and sets it as default by [isDefault] flag.
          *
-         * @param theme     {@link THEME} to add
+         * @param theme [THEME] to add
          * @param isDefault flag to use theme as default
-         * @return this {@link Builder}
+         * @return this [Builder]
          */
         @JvmOverloads
-        fun addTheme(theme: THEME, isDefault: Boolean = false): Builder =
-                addTheme(theme.toColorTheme(application), isDefault)
+        public fun addTheme(
+            theme: THEME,
+            isDefault: Boolean = false,
+        ): Builder = addTheme(theme.toColorTheme(application), isDefault)
 
         /**
-         * Adds {@link ColorTheme} to themes list with specified tag and style resource id
-         * and sets it as default by {@code isDefault} flag.
+         * Adds [ColorTheme] to themes list with specified tag and style resource id
+         * and sets it as default by [isDefault] flag.
          *
-         * @param tag             {@link String} theme tag
+         * @param tag theme tag
          * @param styleResID theme style resource id
-         * @param isDefault       flag to use theme as default
-         * @return this {@link Builder}
+         * @param isDefault flag to use theme as default
+         * @return this [Builder]
          */
         @JvmOverloads
-        fun addTheme(tag: String, @StyleRes styleResID: Int, isDefault: Boolean = false): Builder =
-                addTheme(ColorTheme(application, tag, styleResID), isDefault)
+        public fun addTheme(
+            tag: String,
+            @StyleRes styleResID: Int,
+            isDefault: Boolean = false,
+        ): Builder = addTheme(ColorTheme(application, tag, styleResID), isDefault)
 
         /**
-         * Sets specified {@link THEME} to use as default theme.
+         * Sets specified [THEME] to use as default theme.
          *
-         * @param theme {@link THEME}
-         * @return this {@link Builder}
+         * @param theme [THEME]
+         * @return this [Builder]
          */
-        fun setDefault(theme: THEME): Builder {
-            defaultTag = theme.tag
+        public fun setDefault(theme: THEME): Builder {
+            defaultThemeTag = theme.tag
             return this
         }
 
         /**
          * Sets specified drawable resource id to use as app icon in recent apps list.
-         * Doesn't affect Android SDK below 21.
          *
          * @param iconResId drawable resource id to use as app icon
-         * @return this {@link Builder}
+         * @return this [Builder]
          */
-        fun useAppIcon(@DrawableRes iconResId: Int): Builder {
-            icon = BitmapFactory.decodeResource(application.resources, iconResId)
+        public fun useAppIcon(@DrawableRes iconResId: Int): Builder {
+            this.appIconResId = iconResId
             return this
         }
 
         /**
-         * Sets specified {@link Bitmap} to use as app icon in recent apps list.
-         * Doesn't affect Android SDK below 21.
+         * Sets specified [SharedPreferences] that will be used to save theme tag after theme change.
          *
-         * @param iconBitmap {@link Bitmap} to use as app icon
-         * @return this {@link Builder}
+         * @param prefs [SharedPreferences] instance
+         * @return this [Builder]
          */
-        fun useAppIcon(iconBitmap: Bitmap): Builder {
-            icon = iconBitmap
+        public fun setSharedPreferences(prefs: SharedPreferences): Builder {
+            this.sharedPreferences = prefs
             return this
         }
 
         /**
-         * Sets specified {@link SharedPreferences} that will be used to save theme tag after theme change.
-         *
-         * @param prefs {@link SharedPreferences} instance
-         * @return this {@link Builder}
+         * Method to initialize [MultiThemer] instance.
+         * Will set [THEME.INDIGO] as default theme if saved tag won't found.
          */
-        fun setSharedPreferences(prefs: SharedPreferences): Builder {
-            this.prefs = prefs
-            return this
-        }
-
-        /**
-         * Method to initialize {@link MultiThemer} instance.
-         * Will set {@link THEME#INDIGO} as default theme if saved tag won't found.
-         */
-        fun initialize() {
-            if (themes.isEmpty()) {
+        public fun initialize() {
+            if (themesList.isEmpty()) {
                 Log.i(LOG_TAG, "no themes was added, initializing with default themes list")
-                THEME.values().forEach { addTheme(it) }
+                THEME.entries.forEach(::addTheme)
             }
-            if (themes.none { it.tag == defaultTag }) {
-                Log.i(LOG_TAG, "theme with default tag not found in themes list, setting first theme as default")
-                defaultTag = themes.first().tag
+            if (themesList.none { it.tag == defaultThemeTag }) {
+                Log.i(
+                    LOG_TAG,
+                    "theme with default tag not found in themes list, setting first theme as default"
+                )
+                defaultThemeTag = themesList.first().tag
             }
-            MultiThemer.install(this)
+            install(this)
         }
 
         private fun checkForDuplicates(theme: ColorTheme) {
-            if (themes.any { it.tag == theme.tag }) {
-                throw IllegalStateException("theme with tag '${theme.tag}' already in the list")
+            if (themesList.any { it.tag == theme.tag }) {
+                error("Theme with tag '${theme.tag}' already in the list.")
             }
-            if (themes.any { it.styleResID == theme.styleResID }) {
-                throw IllegalStateException("theme with style resource id '${theme.styleResID}' already in the list")
+            if (themesList.any { it.styleResID == theme.styleResID }) {
+                error("Theme with style resource id '${theme.styleResID}' already in the list.")
             }
         }
     }
