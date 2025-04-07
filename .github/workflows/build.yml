@@ -27,11 +27,16 @@ jobs:
       - name: Decode Keystore
         uses: timheuer/base64-to-file@v1
         with:
-          fileName: 'app/keystore.jks'
+          fileName: 'keystore.jks'
+          fileDir: '${{ github.workspace }}/app/'
           encodedString: ${{ secrets.KEYSTORE }}
 
       - name: Build project
         run: ./gradlew :multithemer:assembleRelease :app:assembleRelease
+        env:
+          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
+          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
+          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
 
       - name: Upload library build artifact
         uses: actions/upload-artifact@v4
