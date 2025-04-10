@@ -1,7 +1,7 @@
 # MultiThemer
 
-[ ![Download](https://api.bintray.com/packages/mini-stren/maven/multithemer/images/download.svg) ](https://bintray.com/mini-stren/maven/multithemer/_latestVersion)
-[![License](https://img.shields.io/badge/License-Apache%202.0-orange.svg)](https://opensource.org/licenses/Apache-2.0)
+![Maven Central Version](https://img.shields.io/maven-central/v/io.github.mini-stren/multithemer?style=flat-square&link=https%3A%2F%2Fcentral.sonatype.com%2Fartifact%2Fio.github.mini-stren%2Fmultithemer%2Foverview)
+[![License](https://img.shields.io/badge/License-Apache_2.0-orange.svg?style=flat-square)](https://opensource.org/licenses/Apache-2.0)
 
 An Android Library that provides easy way to use as many app themes as you would like to.
 
