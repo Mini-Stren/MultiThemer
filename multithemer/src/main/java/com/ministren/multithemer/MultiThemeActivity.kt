@@ -22,6 +22,7 @@ package com.ministren.multithemer
 import android.content.SharedPreferences
 import android.os.Bundle
 import android.util.Log
+import androidx.annotation.CallSuper
 import androidx.annotation.ContentView
 import androidx.annotation.LayoutRes
 import androidx.appcompat.app.AppCompatActivity
@@ -42,24 +43,28 @@ public open class MultiThemeActivity : AppCompatActivity,
     @ContentView
     public constructor(@LayoutRes contentLayoutId: Int) : super(contentLayoutId)
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    @CallSuper
+    protected override fun onCreate(savedInstanceState: Bundle?) {
         MultiThemer.applyThemeTo(this)
         activeThemeTag = MultiThemer.getSavedThemeTag()
         super.onCreate(savedInstanceState)
     }
 
-    override fun onPause() {
+    @CallSuper
+    protected override fun onPause() {
         super.onPause()
         MultiThemer.getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this)
     }
 
-    override fun onResume() {
+    @CallSuper
+    protected override fun onResume() {
         super.onResume()
         MultiThemer.getSharedPreferences().registerOnSharedPreferenceChangeListener(this)
         val tag = MultiThemer.getSavedThemeTag()
         if (activeThemeTag != tag) restartActivity()
     }
 
+    @CallSuper
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences?, key: String?) {
         if (key == MultiThemer.PREFERENCE_KEY) restartActivity()
     }

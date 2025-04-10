@@ -25,5 +25,6 @@
 
 -keep public class com.ministren.multithemer.** {
     public *;
+    protected *;
     public static *;
 }
