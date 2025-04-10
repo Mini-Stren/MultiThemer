@@ -22,37 +22,8 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
-      - name: Check build
-        run: ./gradlew check
-
-      - name: Decode Keystore
-        uses: timheuer/base64-to-file@v1
-        with:
-          fileName: 'keystore.jks'
-          fileDir: '${{ github.workspace }}/app/'
-          encodedString: ${{ secrets.KEYSTORE }}
-
-      - name: Build project
-        run: ./gradlew :multithemer:assembleRelease :app:assembleRelease
-        env:
-          SIGNING_KEY_ALIAS: ${{ secrets.SIGNING_KEY_ALIAS }}
-          SIGNING_KEY_PASSWORD: ${{ secrets.SIGNING_KEY_PASSWORD }}
-          SIGNING_STORE_PASSWORD: ${{ secrets.SIGNING_STORE_PASSWORD }}
-
-      - name: Upload library build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: library
-          path: multithemer/build/outputs/aar/multithemer-release.aar
-
-      - name: Upload demo app build artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: demo-app
-          path: app/build/outputs/apk/release/app-release.apk
-
-      - name: Publish library
-        run: ./gradlew jreleaserConfig publish jreleaserFullRelease
+      - name: Check publish config
+        run: ./gradlew jreleaserConfig
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.JRELEASER_MAVENCENTRAL_USERNAME }}
@@ -61,13 +32,15 @@ jobs:
           JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
           JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
 
-      - name: Save Gradle cache
-        uses: actions/cache@v4
-        continue-on-error: true
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
+      - name: Build library
+        run: ./gradlew clean publish
+
+      - name: Publish library
+        run: ./gradlew jreleaserFullRelease
+        env:
+          JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.JRELEASER_MAVENCENTRAL_USERNAME }}
+          JRELEASER_MAVENCENTRAL_PASSWORD: ${{ secrets.JRELEASER_MAVENCENTRAL_PASSWORD }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
