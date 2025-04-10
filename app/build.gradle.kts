@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.konan.properties.loadProperties
 
 plugins {
     alias(libs.plugins.android.application)
@@ -13,8 +14,10 @@ android {
         applicationId = "com.ministren.demoapp.multithemer"
         minSdk = 21
         targetSdk = 35
-        versionCode = 7
-        versionName = "1.4.2"
+
+        val buildProperties = loadProperties("build.properties")
+        versionCode = buildProperties.getProperty("VERSION_CODE").toInt()
+        versionName = buildProperties.getProperty("VERSION_NAME")
     }
 
     buildFeatures {

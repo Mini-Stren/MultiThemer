@@ -30,7 +30,7 @@ Kotlin DSL:
 
 ```kotlin
 dependencies {
-    implementation("com.github.ministren:multithemer:1.4.2")
+    implementation("io.github.mini-stren:multithemer:1.5.0")
 }
 ```       
 
@@ -38,7 +38,7 @@ Groovy DSL:
 
 ```gradle
 dependencies {
-    implementation 'com.github.ministren:multithemer:1.4.2'
+    implementation 'io.github.mini-stren:multithemer:1.5.0'
 }
 ```
 
@@ -46,9 +46,9 @@ dependencies {
 
 ```maven
 <dependency>
-  <groupId>com.github.ministren</groupId>
+  <groupId>io.github.mini-stren</groupId>
   <artifactId>multithemer</artifactId>
-  <version>1.4.2</version>
+  <version>1.5.0</version>
   <type>pom</type>
 </dependency>
 ```

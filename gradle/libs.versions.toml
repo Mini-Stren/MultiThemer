@@ -1,6 +1,7 @@
 [versions]
 agp = "8.9.1"
 kotlin = "2.0.21"
+jreleaser = "1.17.0"
 coreKtx = "1.15.0"
 appcompat = "1.7.0"
 preferenceKtx = "1.2.1"
@@ -28,3 +29,4 @@ androidbroadcast-vbpd = { group = "dev.androidbroadcast.vbpd", name = "vbpd", ve
 android-application = { id = "com.android.application", version.ref = "agp" }
 android-library = { id = "com.android.library", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+jreleaser = { id = "org.jreleaser", version.ref = "jreleaser" }
