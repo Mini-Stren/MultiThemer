@@ -52,7 +52,7 @@ jobs:
           path: app/build/outputs/apk/release/app-release.apk
 
       - name: Publish library
-        run: ./gradlew jreleaserConfig jreleaserFullRelease
+        run: ./gradlew jreleaserConfig publish jreleaserFullRelease
         env:
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           JRELEASER_MAVENCENTRAL_USERNAME: ${{ secrets.JRELEASER_MAVENCENTRAL_USERNAME }}
