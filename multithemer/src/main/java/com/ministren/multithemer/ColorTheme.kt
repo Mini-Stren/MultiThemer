@@ -23,6 +23,7 @@ import android.content.Context
 import androidx.annotation.AttrRes
 import androidx.annotation.ColorInt
 import androidx.annotation.StyleRes
+import androidx.appcompat.R as AppCompatR
 import com.google.android.material.R as MaterialR
 
 /**
@@ -45,10 +46,10 @@ public class ColorTheme(
     }
 
     @ColorInt
-    public fun getColorPrimary(): Int = getAttrColor(MaterialR.attr.colorPrimary)
+    public fun getColorPrimary(): Int = getAttrColor(AppCompatR.attr.colorPrimary)
 
     @ColorInt
-    public fun getColorPrimaryDark(): Int = getAttrColor(MaterialR.attr.colorPrimaryDark)
+    public fun getColorPrimaryDark(): Int = getAttrColor(AppCompatR.attr.colorPrimaryDark)
 
     @ColorInt
     public fun getColorSecondary(): Int = getAttrColor(MaterialR.attr.colorSecondary)

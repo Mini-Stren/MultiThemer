@@ -36,7 +36,7 @@ import com.ministren.multithemer.MultiThemer.THEME
 import com.ministren.multithemer.MultiThemer.build
 import com.ministren.multithemer.MultiThemer.getActiveTheme
 import com.ministren.multithemer.MultiThemer.getThemesList
-import com.google.android.material.R as MaterialR
+import androidx.appcompat.R as AppCompatR
 
 /**
  * Provides easy way to use as many app themes as you would like.
@@ -114,7 +114,7 @@ public object MultiThemer {
         activity.setTheme(activeTheme!!.styleResID)
 
         if (appIconResId != null) {
-            val primaryColor = activeTheme.getAttrColor(MaterialR.attr.colorPrimary)
+            val primaryColor = activeTheme.getAttrColor(AppCompatR.attr.colorPrimary)
             val taskDescription = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 ActivityManager.TaskDescription.Builder().apply {
                     appIconResId?.let(::setIcon)

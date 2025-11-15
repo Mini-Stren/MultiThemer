@@ -1,3 +1,4 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.konan.properties.loadProperties
 import org.jreleaser.model.Active
 
@@ -15,14 +16,14 @@ kotlin {
 
 android {
     namespace = "com.ministren.multithemer"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         minSdk = 21
     }
 
+    androidResources.enable = true
     buildFeatures {
-        androidResources = true
         buildConfig = true
         viewBinding = true
     }
@@ -48,10 +49,24 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-        freeCompilerArgs = listOf(
-            "-Xstring-concat=inline"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+            vendor.set(JvmVendorSpec.ADOPTIUM)
+            implementation.set(JvmImplementation.VENDOR_SPECIFIC)
+        }
+        freeCompilerArgs.addAll(
+            "-Xstring-concat=inline",
+            "-Xannotation-default-target=param-property"
         )
     }
 }

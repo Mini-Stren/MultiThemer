@@ -1,4 +1,5 @@
 import com.android.build.gradle.internal.cxx.configure.gradleLocalProperties
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.konan.properties.loadProperties
 
 plugins {
@@ -8,12 +9,12 @@ plugins {
 
 android {
     namespace = "com.ministren.demoapp.multithemer"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "com.ministren.demoapp.multithemer"
         minSdk = 21
-        targetSdk = 35
+        targetSdk = 36
 
         val buildProperties = loadProperties("build.properties")
         versionCode = buildProperties.getProperty("VERSION_CODE").toInt()
@@ -49,8 +50,21 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.JVM_11
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(17))
+            vendor.set(JvmVendorSpec.ADOPTIUM)
+            implementation.set(JvmImplementation.VENDOR_SPECIFIC)
+        }
     }
 }
 
