@@ -39,8 +39,7 @@ public class MultiThemerListFragment : Fragment() {
     ): View? {
         val view = inflater.inflate(R.layout.multithemer_list_fragment, container, false)
         if (view is RecyclerView) {
-            val context = view.getContext()
-            view.layoutManager = LinearLayoutManager(context)
+            view.layoutManager = LinearLayoutManager(view.context)
             view.adapter = ListFragmentAdapter()
         }
         return view

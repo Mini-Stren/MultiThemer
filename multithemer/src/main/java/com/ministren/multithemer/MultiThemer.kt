@@ -31,8 +31,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.StyleRes
 import androidx.core.content.edit
 import androidx.preference.PreferenceManager
-import com.ministren.multithemer.MultiThemer.Builder
-import com.ministren.multithemer.MultiThemer.THEME
 import com.ministren.multithemer.MultiThemer.build
 import com.ministren.multithemer.MultiThemer.getActiveTheme
 import com.ministren.multithemer.MultiThemer.getThemesList
